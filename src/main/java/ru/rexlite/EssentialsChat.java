@@ -47,7 +47,7 @@ public class EssentialsChat extends PluginBase implements Listener {
 
         getLogger().info("§2EssentialsChat enabled! Provider: §a" + providerName);
         getLogger().info("§f");
-        getLogger().info("§2Plugin from: §ahttps://cloudburstmc.org/resources/lpchat.1062/");
+        getLogger().info("§2Plugin from: §ahttps://cloudburstmc.org/resources/essentialschat.1062/");
     }
 
     @EventHandler
