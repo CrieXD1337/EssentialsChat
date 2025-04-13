@@ -40,14 +40,14 @@ public class EssentialsChat extends PluginBase implements Listener {
                 provider = new MultipassProvider();
                 break;
             default:
-                getLogger().error("§c[LP§4Chat] §cUknown provider:§4 " + providerName + ". §cThe provider has been reset to §4LuckPerms.");
+                getLogger().error("§c[Essentials§4Chat] §cUknown provider:§4 " + providerName + ". §cThe provider has been reset to §4LuckPerms.");
                 provider = new LProvider();
                 break;
         }
 
-        getLogger().info("§2EssentialsChat enabled! Provider: §a" + providerName);
+        getLogger().info("§2EssentialsChat enabled! Provider: " + providerName);
         getLogger().info("§f");
-        getLogger().info("§2Plugin from: §ahttps://cloudburstmc.org/resources/essentialschat.1062/");
+        getLogger().info("§2Plugin from: https://cloudburstmc.org/resources/essentialschat.1062/");
     }
 
     @EventHandler
@@ -58,28 +58,25 @@ public class EssentialsChat extends PluginBase implements Listener {
         String prefix = provider.getPrefix(player);
         String suffix = provider.getSuffix(player);
 
-        // Определение типа чата
         if (message.startsWith(globalChatSymbol)) {
-            // Глобальный чат
             String formattedMessage = globalChatFormat
                     .replace("{prefix}", prefix)
                     .replace("{player}", player.getName())
                     .replace("{suffix}", suffix)
                     .replace("{msg}", message.substring(globalChatSymbol.length()).trim());
 
-            event.setCancelled(true); // Отменяем стандартное событие чата
+            event.setCancelled(true);
             for (Player onlinePlayer : getServer().getOnlinePlayers().values()) {
                 onlinePlayer.sendMessage(formattedMessage);
             }
         } else {
-            // Локальный чат
             String formattedMessage = localChatFormat
                     .replace("{prefix}", prefix)
                     .replace("{player}", player.getName())
                     .replace("{suffix}", suffix)
                     .replace("{msg}", message);
 
-            event.setCancelled(true); // Отменяем стандартное событие чата
+            event.setCancelled(true);
             for (Player onlinePlayer : getServer().getOnlinePlayers().values()) {
                 if (onlinePlayer.distance(player) <= localChatRadius) {
                     onlinePlayer.sendMessage(formattedMessage);
