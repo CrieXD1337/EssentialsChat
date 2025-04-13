@@ -13,7 +13,6 @@
     </properties>
 
     <repositories>
-        <!-- LuckPerms repository -->
         <repository>
             <id>luckperms-repo</id>
             <url>https://repo.luckperms.net/</url>
@@ -21,14 +20,12 @@
     </repositories>
 
     <dependencies>
-        <!-- Nukkit dependency -->
         <dependency>
             <groupId>cn.nukkit</groupId>
             <artifactId>nukkit</artifactId>
             <version>1.0-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
-
         <dependency>
             <groupId>ru.nukkit.multipass</groupId>
             <artifactId>multipass</artifactId>
@@ -36,12 +33,10 @@
             <scope>system</scope>
             <systemPath>${project.basedir}/libs/Multipass-1.1.6.jar</systemPath>
         </dependency>
-
-        <!-- LuckPerms API dependency -->
         <dependency>
             <groupId>net.luckperms</groupId>
             <artifactId>api</artifactId>
-            <version>5.4</version> <!-- Убедитесь, что версия актуальна -->
+            <version>5.4</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>
