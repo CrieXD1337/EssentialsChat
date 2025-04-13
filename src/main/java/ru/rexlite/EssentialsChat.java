@@ -40,7 +40,7 @@ public class EssentialsChat extends PluginBase implements Listener {
                 provider = new MultipassProvider();
                 break;
             default:
-                getLogger().error("§c[Essentials§4Chat] §cUknown provider:§4 " + providerName + ". §cThe provider has been reset to §4LuckPerms.");
+                getLogger().error("§c[Essentials§4Chat] §cUnknown provider:§4 " + providerName + ". §cThe provider has been reset to §4LuckPerms.");
                 provider = new LProvider();
                 break;
         }
@@ -58,30 +58,28 @@ public class EssentialsChat extends PluginBase implements Listener {
         String prefix = provider.getPrefix(player);
         String suffix = provider.getSuffix(player);
 
+        String formattedMessage;
         if (message.startsWith(globalChatSymbol)) {
-            String formattedMessage = globalChatFormat
-                    .replace("{prefix}", prefix)
-                    .replace("{player}", player.getName())
-                    .replace("{suffix}", suffix)
-                    .replace("{msg}", message.substring(globalChatSymbol.length()).trim());
-
-            event.setCancelled(true);
+            formattedMessage = formatMessage(globalChatFormat, player, message.substring(globalChatSymbol.length()).trim());
             for (Player onlinePlayer : getServer().getOnlinePlayers().values()) {
                 onlinePlayer.sendMessage(formattedMessage);
             }
         } else {
-            String formattedMessage = localChatFormat
-                    .replace("{prefix}", prefix)
-                    .replace("{player}", player.getName())
-                    .replace("{suffix}", suffix)
-                    .replace("{msg}", message);
-
-            event.setCancelled(true);
+            formattedMessage = formatMessage(localChatFormat, player, message);
             for (Player onlinePlayer : getServer().getOnlinePlayers().values()) {
                 if (onlinePlayer.distance(player) <= localChatRadius) {
                     onlinePlayer.sendMessage(formattedMessage);
                 }
             }
         }
+
+        event.setFormat(formattedMessage);
+    }
+
+    private String formatMessage(String format, Player player, String message) {
+        return format.replace("{prefix}", provider.getPrefix(player))
+                .replace("{player}", player.getName())
+                .replace("{suffix}", provider.getSuffix(player))
+                .replace("{msg}", message);
     }
 }
