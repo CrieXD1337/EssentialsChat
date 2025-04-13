@@ -52,6 +52,10 @@ public class EssentialsChat extends PluginBase implements Listener {
 
     @EventHandler
     public void onPlayerChat(PlayerChatEvent event) {
+        if (event.isCancelled()) {
+            return;
+        }
+
         Player player = event.getPlayer();
         String message = event.getMessage();
 
@@ -61,19 +65,21 @@ public class EssentialsChat extends PluginBase implements Listener {
         String formattedMessage;
         if (message.startsWith(globalChatSymbol)) {
             formattedMessage = formatMessage(globalChatFormat, player, message.substring(globalChatSymbol.length()).trim());
-            for (Player onlinePlayer : getServer().getOnlinePlayers().values()) {
-                onlinePlayer.sendMessage(formattedMessage);
-            }
         } else {
             formattedMessage = formatMessage(localChatFormat, player, message);
-            for (Player onlinePlayer : getServer().getOnlinePlayers().values()) {
-                if (onlinePlayer.distance(player) <= localChatRadius) {
-                    onlinePlayer.sendMessage(formattedMessage);
-                }
-            }
         }
 
         event.setFormat(formattedMessage);
+
+        if (!message.startsWith(globalChatSymbol)) {
+            event.getRecipients().removeIf(onlinePlayer -> {
+                if (!(onlinePlayer instanceof Player)) {
+                    return true;
+                }
+                Player playerInList = (Player) onlinePlayer;
+                return playerInList.distance(player) > localChatRadius;
+            });
+        }
     }
 
     private String formatMessage(String format, Player player, String message) {
