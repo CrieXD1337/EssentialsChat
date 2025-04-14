@@ -1,20 +1,20 @@
 package ru.rexlite;
 
 import cn.nukkit.Player;
-import cn.nukkit.command.Command;
-import cn.nukkit.command.CommandSender;
 import cn.nukkit.event.EventHandler;
 import cn.nukkit.event.Listener;
 import cn.nukkit.event.player.PlayerChatEvent;
 import cn.nukkit.event.player.PlayerJoinEvent;
 import cn.nukkit.plugin.PluginBase;
 import cn.nukkit.utils.Config;
-import net.luckperms.api.LuckPerms;
 import net.luckperms.api.event.EventBus;
 import net.luckperms.api.event.user.UserDataRecalculateEvent;
 import ru.rexlite.providers.PrefixSuffixProvider;
 import ru.rexlite.providers.LProvider;
 import ru.rexlite.providers.MultipassProvider;
+
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class EssentialsChat extends PluginBase implements Listener {
 
@@ -25,6 +25,9 @@ public class EssentialsChat extends PluginBase implements Listener {
     private PrefixSuffixProvider provider;
     private boolean prefixInSettingsAndHeadEnabled;
     private String prefixInSettingsAndHeadFormat;
+
+    // Таймер для периодической проверки
+    private Timer updateTimer;
 
     @Override
     public void onEnable() {
@@ -57,9 +60,18 @@ public class EssentialsChat extends PluginBase implements Listener {
                 break;
         }
 
+        startUpdateTimer();
+
         getLogger().info("§2EssentialsChat enabled! Provider: " + providerName);
         getLogger().info("§f");
         getLogger().info("§2Plugin from: https://cloudburstmc.org/resources/essentialschat.1062/");
+    }
+
+    @Override
+    public void onDisable() {
+        if (updateTimer != null) {
+            updateTimer.cancel();
+        }
     }
 
     @EventHandler
@@ -129,5 +141,17 @@ public class EssentialsChat extends PluginBase implements Listener {
         if (player != null) {
             updatePlayerDisplayName(player);
         }
+    }
+
+    private void startUpdateTimer() {
+        updateTimer = new Timer();
+        updateTimer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                for (Player player : getServer().getOnlinePlayers().values()) {
+                    updatePlayerDisplayName(player);
+                }
+            }
+        }, 0, 5 * 1000);
     }
 }
