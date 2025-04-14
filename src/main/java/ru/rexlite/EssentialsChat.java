@@ -4,6 +4,7 @@ import cn.nukkit.Player;
 import cn.nukkit.event.EventHandler;
 import cn.nukkit.event.Listener;
 import cn.nukkit.event.player.PlayerChatEvent;
+import cn.nukkit.event.player.PlayerJoinEvent;
 import cn.nukkit.plugin.PluginBase;
 import cn.nukkit.utils.Config;
 import ru.rexlite.providers.PrefixSuffixProvider;
@@ -17,6 +18,8 @@ public class EssentialsChat extends PluginBase implements Listener {
     private String localChatFormat;
     private String globalChatFormat;
     private PrefixSuffixProvider provider;
+    private boolean prefixInSettingsAndHeadEnabled;
+    private String prefixInSettingsAndHeadFormat;
 
     @Override
     public void onEnable() {
@@ -30,6 +33,8 @@ public class EssentialsChat extends PluginBase implements Listener {
         globalChatSymbol = config.getString("global-chat-symbol", "!");
         localChatFormat = config.getString("local-chat-format", "§7[§aL§7] §7[{prefix}§r§7] §f{player}{suffix} §a» §8{msg}");
         globalChatFormat = config.getString("global-chat-format", "§7[§4G§7] §7[{prefix}§r§7] §f{player}{suffix} §a» §f{msg}");
+        prefixInSettingsAndHeadEnabled = config.getBoolean("prefix-in-settings-and-head.enabled", false);
+        prefixInSettingsAndHeadFormat = config.getString("prefix-in-settings-and-head.format", "[{prefix}] {player}{suffix}");
 
         String providerName = config.getString("provider", "LuckPerms");
         switch (providerName.toLowerCase()) {
@@ -82,10 +87,33 @@ public class EssentialsChat extends PluginBase implements Listener {
         }
     }
 
+    @EventHandler
+    public void onPlayerJoin(PlayerJoinEvent event) {
+        Player player = event.getPlayer();
+        updatePlayerDisplayName(player);
+    }
+
     private String formatMessage(String format, Player player, String message) {
         return format.replace("{prefix}", provider.getPrefix(player))
                 .replace("{player}", player.getName())
                 .replace("{suffix}", provider.getSuffix(player))
                 .replace("{msg}", message);
+    }
+
+    private void updatePlayerDisplayName(Player player) {
+        if (!prefixInSettingsAndHeadEnabled) {
+            return;
+        }
+
+        String prefix = provider.getPrefix(player);
+        String suffix = provider.getSuffix(player);
+
+        String displayName = prefixInSettingsAndHeadFormat
+                .replace("{prefix}", prefix)
+                .replace("{player}", player.getName())
+                .replace("{suffix}", suffix);
+
+        player.setDisplayName(displayName);
+        player.setNameTag(displayName);
     }
 }
