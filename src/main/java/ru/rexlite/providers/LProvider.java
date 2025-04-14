@@ -7,9 +7,14 @@ import net.luckperms.api.model.user.User;
 
 public class LProvider implements PrefixSuffixProvider {
 
+    private final LuckPerms luckPerms;
+
+    public LProvider() {
+        this.luckPerms = LuckPermsProvider.get();
+    }
+
     @Override
     public String getPrefix(Player player) {
-        LuckPerms luckPerms = LuckPermsProvider.get();
         User user = luckPerms.getUserManager().getUser(player.getUniqueId());
         return user != null && user.getCachedData().getMetaData().getPrefix() != null
                 ? user.getCachedData().getMetaData().getPrefix()
@@ -18,10 +23,13 @@ public class LProvider implements PrefixSuffixProvider {
 
     @Override
     public String getSuffix(Player player) {
-        LuckPerms luckPerms = LuckPermsProvider.get();
         User user = luckPerms.getUserManager().getUser(player.getUniqueId());
         return user != null && user.getCachedData().getMetaData().getSuffix() != null
                 ? user.getCachedData().getMetaData().getSuffix()
                 : "";
+    }
+
+    public LuckPerms getLuckPerms() {
+        return luckPerms;
     }
 }
