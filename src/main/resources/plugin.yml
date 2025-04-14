@@ -1,5 +1,5 @@
 name: EssentialsChat
-version: 1.0.3
+version: 1.0.4
 main: ru.rexlite.EssentialsChat
 api: ["1.1.0"]
 softdepend: [LuckPerms, Multipass]
