@@ -1,12 +1,17 @@
 package ru.rexlite;
 
 import cn.nukkit.Player;
+import cn.nukkit.command.Command;
+import cn.nukkit.command.CommandSender;
 import cn.nukkit.event.EventHandler;
 import cn.nukkit.event.Listener;
 import cn.nukkit.event.player.PlayerChatEvent;
 import cn.nukkit.event.player.PlayerJoinEvent;
 import cn.nukkit.plugin.PluginBase;
 import cn.nukkit.utils.Config;
+import net.luckperms.api.LuckPerms;
+import net.luckperms.api.event.EventBus;
+import net.luckperms.api.event.user.UserDataRecalculateEvent;
 import ru.rexlite.providers.PrefixSuffixProvider;
 import ru.rexlite.providers.LProvider;
 import ru.rexlite.providers.MultipassProvider;
@@ -40,6 +45,8 @@ public class EssentialsChat extends PluginBase implements Listener {
         switch (providerName.toLowerCase()) {
             case "luckperms":
                 provider = new LProvider();
+                EventBus eventBus = ((LProvider) provider).getLuckPerms().getEventBus();
+                eventBus.subscribe(this, UserDataRecalculateEvent.class, this::onUserDataRecalculate);
                 break;
             case "multipass":
                 provider = new MultipassProvider();
@@ -115,5 +122,12 @@ public class EssentialsChat extends PluginBase implements Listener {
 
         player.setDisplayName(displayName);
         player.setNameTag(displayName);
+    }
+
+    private void onUserDataRecalculate(UserDataRecalculateEvent event) {
+        Player player = getServer().getPlayer(event.getUser().getUniqueId()).orElse(null);
+        if (player != null) {
+            updatePlayerDisplayName(player);
+        }
     }
 }
