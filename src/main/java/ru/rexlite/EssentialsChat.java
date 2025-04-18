@@ -33,7 +33,6 @@ public class EssentialsChat extends PluginBase implements Listener {
     private String messagePrefixCleared;
     private String messagePrefixSet;
     private String messageInvalidUsage;
-    private String messagePermissionDenied;
     private String messageInvalidProvider;
     private String messagePrefixLengthError;
     private String messagePrefixInvalidCharacters;
@@ -41,16 +40,11 @@ public class EssentialsChat extends PluginBase implements Listener {
 
     @Override
     public void onEnable() {
-
         this.getServer().getPluginManager().registerEvents(this, this);
 
-        saveResource("config.yml", true);
-
-        // Загрузка конфига
+        saveDefaultConfig();
         reloadConfig();
         Config config = getConfig();
-
-        getLogger().info("Config loaded: " + config.getAll());
         localChatRadius = config.getInt("local-chat-radius", 100);
         globalChatSymbol = config.getString("global-chat-symbol", "!");
         localChatFormat = config.getString("local-chat-format", "§7[§aL§7] §7[{prefix}§r§7] §f{player}{suffix} §a» §8{msg}");
@@ -70,25 +64,23 @@ public class EssentialsChat extends PluginBase implements Listener {
                 provider = new LProvider();
                 break;
         }
-
         opNicknameColor = config.getString("op-nickname-color", "c");
         if (!isValidMinecraftColor(opNicknameColor)) {
             getLogger().warning("§cUnsupported color format in op-nickname-color: §4" + opNicknameColor + "§c. Moved to default value: §44");
             opNicknameColor = "4"; // Default value
         }
+
         prefixMaxCharacters = config.getInt("prefix-max-characters", 15);
         prefixMinCharacters = config.getInt("prefix-min-characters", 3);
         allowedCharactersRegex = config.getString("allowed-characters", "A-Za-z0-9_-");
         messagePrefixCleared = config.getString("messages.prefix-cleared", "§7> §fYour prefix was §ccleared");
         messagePrefixSet = config.getString("messages.prefix-set", "§7> §fYour prefix successfully moved to: §b{prefix}");
         messageInvalidUsage = config.getString("messages.invalid-usage", "§7> §cUsage: /prefix <prefix|off>");
-        messagePermissionDenied = config.getString("messages.permission-denied", "§c%commands.generic.permission");
         messageInvalidProvider = config.getString("messages.invalid-provider", "§7> §cProvider §4{provider} §cis currently not available for prefixes. Use §4LuckPerms.");
         messagePrefixLengthError = config.getString("messages.prefix-length-error", "§7> §cThe prefix must be between §4{min}§c and §4{max}§c characters.");
         messagePrefixInvalidCharacters = config.getString("messages.prefix-invalid-characters", "§cPrefix contains invalid characters! Only allowed: §4{allowed}");
         messageCommandOnlyForPlayers = config.getString("messages.command-only-for-players", "§cAllowed only for players!");
         startUpdateTimer();
-
         getLogger().info("§2EssentialsChat enabled! Provider: " + provider.getClass().getSimpleName());
         getLogger().info("§f");
         getLogger().info("§2Plugin from: https://cloudburstmc.org/resources/essentialschat.1062/");
@@ -197,10 +189,9 @@ public class EssentialsChat extends PluginBase implements Listener {
             sender.sendMessage(messageCommandOnlyForPlayers);
             return true;
         }
-
         Player player = (Player) sender;
         if (!player.hasPermission("essentialschat.prefix.setprefix")) {
-            player.sendMessage(messagePermissionDenied);
+            player.sendMessage("§c%commands.generic.permission");
             return true;
         }
 
@@ -213,9 +204,7 @@ public class EssentialsChat extends PluginBase implements Listener {
             player.sendMessage(messageInvalidUsage);
             return true;
         }
-
         String input = args[0];
-
         if (input.equalsIgnoreCase("off") || input.equalsIgnoreCase("clear")) {
             clearPlayerPrefix(player);
             return true;
