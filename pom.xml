@@ -5,7 +5,7 @@
 
     <groupId>ru.rexlite</groupId>
     <artifactId>EssentialsChat</artifactId>
-    <version>1.0.4</version>
+    <version>1.0.6</version>
 
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
@@ -13,7 +13,7 @@
     </properties>
 
     <repositories>
-         <repository>
+        <repository>
             <id>opencollab-repo-snapshot</id>
             <url>https://repo.opencollab.dev/maven-snapshots</url>
         </repository>
@@ -46,6 +46,12 @@
     </dependencies>
 
     <build>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
