@@ -1,7 +1,14 @@
 name: EssentialsChat
-version: 1.0.4
+version: 1.0.6
 main: ru.rexlite.EssentialsChat
 api: ["1.1.0"]
 softdepend: [LuckPerms, Multipass]
-author: ["Criex", "Rexl1te"]
+author: "Criex, rexl1te"
 description: Chat plugin with global and local chat support for LuckPerms or Multipass
+commands:
+  prefix:
+    permission: essentialschat.prefix.setprefix
+    description: enable/disable your prefix
+permissions:
+  essentialschat.prefix.setprefix:
+    default: op
