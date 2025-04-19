@@ -1,5 +1,5 @@
 # - - - - - - - - - - - - - - - #
-#      GLOBAL SETTINGS          #
+#       GLOBAL SETTINGS         #
 # - - - - - - - - - - - - - - - #
 
 # Providers: LuckPerms, Multipass
@@ -25,7 +25,7 @@ prefix-in-settings-and-head:
   format: "[{prefix}] {player}{suffix}"
 
 # - - - - - - - - - - - - - - - #
-#      /prefix command          #
+#       /prefix command         #
 # - - - - - - - - - - - - - - - #
 
 # maximum prefix charters in prefix
@@ -38,13 +38,36 @@ prefix-min-characters: 3
 allowed-characters: "A-Za-z0-9_-"
 
 # - - - - - - - - - - - - - - - #
-#      GLOBAL MESSAGES          #
+#        /nick command          #
+# - - - - - - - - - - - - - - - #
+
+max-nick-characters-length: 15 # Maximum characters allowed in a nickname
+min-nick-characters-length: 3 # Minimum characters required in a nickname
+allowed-characters-in-nick: "A-Za-z0-9_-" # Allowed characters in nicknames
+allow-colored-nick: false # Allow using color codes in nicknames (e.g., &b)
+fake-nickname-character: ~ # You also can use BOLD
+
+
+# - - - - - - - - - - - - - - - #
+#       GLOBAL MESSAGES         #
 # - - - - - - - - - - - - - - - #
 messages:
+
+  # Prefix command messages
   prefix-cleared: "§7> §fYour prefix was §ccleared"
   prefix-set: "§7> §fYour prefix successfully moved to: §b{prefix}"
-  invalid-usage: "§7> §cUsage: §4/prefix <prefix|off>"
+  invalid-usage: "§7> §cUsage: /prefix <prefix|off>"
   invalid-provider: "§7> §cProvider §4{provider} §cis currently not available for prefixes. Use §4LuckPerms."
   prefix-length-error: "§7> §cThe prefix must be between §4{min}§c and §4{max}§c characters."
   prefix-invalid-characters: "§cPrefix contains invalid characters! Only allowed: §4{allowed}"
   command-only-for-players: "§cAllowed only for players!"
+
+  # Nickname command messages
+  nick-success: "§7> §fYour nickname changed to §b{nick}"
+  nick-cleared: "§7> §fYour nickname §ccleared"
+  nick-usage: "§7> §cUsage: §e/nick <nick>"
+
+  # Realname command messages
+  realname-usage: "§7> §cUsage: §e/realname <player>"
+  realname-output: "§7> §fReal name of player §b{player}: §3{nick}"
+  realname-not-found: "§7> §cPlayer not found!"
