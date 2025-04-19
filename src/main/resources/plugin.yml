@@ -1,7 +1,7 @@
 name: EssentialsChat
 version: ${pom.version}
 main: ru.rexlite.EssentialsChat
-api: ["1.1.0"]
+api: ["1.1.0", "1.0.11"]
 softdepend: [LuckPerms, Multipass]
 author: "Criex, rexl1te"
 description: Chat plugin with global and local chat support for LuckPerms or Multipass
@@ -9,6 +9,17 @@ commands:
   prefix:
     permission: essentialschat.prefix.setprefix
     description: enable/disable your prefix
+  nick:
+    permssion: essentialschat.nick.setnick
+    description: enable/disable your fake nick
+  realname:
+    permision: essentialschat.nick.realname
+    description: check player's real name
+    usage: /realname <player>
 permissions:
   essentialschat.prefix.setprefix:
+    default: op
+  essentialschat.nick.setnick:
+    default: op
+  essentialschat.nick.realname:
     default: op
