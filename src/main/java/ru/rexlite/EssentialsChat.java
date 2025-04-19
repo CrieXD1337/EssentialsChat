@@ -13,11 +13,12 @@ import ru.rexlite.providers.PrefixSuffixProvider;
 import ru.rexlite.providers.LProvider;
 import ru.rexlite.providers.MultipassProvider;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
 public class EssentialsChat extends PluginBase implements Listener {
-
     private int localChatRadius;
     private String globalChatSymbol;
     private String localChatFormat;
@@ -37,14 +38,27 @@ public class EssentialsChat extends PluginBase implements Listener {
     private String messagePrefixLengthError;
     private String messagePrefixInvalidCharacters;
     private String messageCommandOnlyForPlayers;
+    private int maxNickCharacters;
+    private int minNickCharacters;
+    private String allowedCharactersInNickRegex;
+    private boolean allowColoredNick;
+    private String messageNickSuccess;
+    private String messageNickCleared;
+    private String messageNickUsage;
+    private String messageRealNameUsage;
+    private String messageRealNameOutput;
+    private String messageRealNameNotFound;
+    private String fakeNicknameCharacter;
+
+    private final Map<String, String> playerNicks = new HashMap<>();
 
     @Override
     public void onEnable() {
         this.getServer().getPluginManager().registerEvents(this, this);
-
         saveDefaultConfig();
         reloadConfig();
         Config config = getConfig();
+
         localChatRadius = config.getInt("local-chat-radius", 100);
         globalChatSymbol = config.getString("global-chat-symbol", "!");
         localChatFormat = config.getString("local-chat-format", "§7[§aL§7] §7[{prefix}§r§7] §f{player}{suffix} §a» §8{msg}");
@@ -69,7 +83,6 @@ public class EssentialsChat extends PluginBase implements Listener {
             getLogger().warning("§cUnsupported color format in op-nickname-color: §4" + opNicknameColor + "§c. Moved to default value: §44");
             opNicknameColor = "4"; // Default value
         }
-
         prefixMaxCharacters = config.getInt("prefix-max-characters", 15);
         prefixMinCharacters = config.getInt("prefix-min-characters", 3);
         allowedCharactersRegex = config.getString("allowed-characters", "A-Za-z0-9_-");
@@ -80,6 +93,22 @@ public class EssentialsChat extends PluginBase implements Listener {
         messagePrefixLengthError = config.getString("messages.prefix-length-error", "§7> §cThe prefix must be between §4{min}§c and §4{max}§c characters.");
         messagePrefixInvalidCharacters = config.getString("messages.prefix-invalid-characters", "§cPrefix contains invalid characters! Only allowed: §4{allowed}");
         messageCommandOnlyForPlayers = config.getString("messages.command-only-for-players", "§cAllowed only for players!");
+        maxNickCharacters = config.getInt("max-nick-characters-length", 15);
+        minNickCharacters = config.getInt("min-nick-characters-length", 3);
+        allowedCharactersInNickRegex = config.getString("allowed-characters-in-nick", "A-Za-z0-9_-");
+        allowColoredNick = config.getBoolean("allow-colored-nick", false);
+        fakeNicknameCharacter = config.getString("fake-nickname-character", "~");
+        if ("BOLD".equalsIgnoreCase(fakeNicknameCharacter)) {
+            fakeNicknameCharacter = "§o";
+        } else {
+            fakeNicknameCharacter = replaceAmpersandWithSectionSign(fakeNicknameCharacter);
+        }
+        messageNickSuccess = config.getString("messages.nick-success", "§7> §fYour nickname changed to §b{nick}");
+        messageNickCleared = config.getString("messages.nick-cleared", "§7> §fYour nickname §ccleared");
+        messageNickUsage = config.getString("messages.nick-usage", "§7> §cUsage: §e/nick <nick>");
+        messageRealNameUsage = config.getString("messages.realname-usage", "§7> §cUsage: §e/realname <player>");
+        messageRealNameOutput = config.getString("messages.realname-output", "§7> Real name of player §b{player}: §3{nick}");
+        messageRealNameNotFound = config.getString("messages.realname-not-found", "§7> §cPlayer not found");
         startUpdateTimer();
         getLogger().info("§2EssentialsChat enabled! Provider: " + provider.getClass().getSimpleName());
         getLogger().info("§f");
@@ -98,7 +127,6 @@ public class EssentialsChat extends PluginBase implements Listener {
         if (event.isCancelled()) {
             return;
         }
-
         Player player = event.getPlayer();
         String message = event.getMessage();
         String prefix = provider.getPrefix(player);
@@ -109,9 +137,7 @@ public class EssentialsChat extends PluginBase implements Listener {
         } else {
             formattedMessage = formatMessage(localChatFormat, player, message);
         }
-
         event.setFormat(formattedMessage);
-
         if (!message.startsWith(globalChatSymbol)) {
             event.getRecipients().removeIf(onlinePlayer -> {
                 if (!(onlinePlayer instanceof Player)) {
@@ -137,6 +163,14 @@ public class EssentialsChat extends PluginBase implements Listener {
     }
 
     private String getPlayerDisplayName(Player player) {
+        String nick = playerNicks.getOrDefault(player.getName(), null);
+        if (nick != null) {
+            String formattedNick = allowColoredNick ? replaceAmpersandWithSectionSign(nick) : nick;
+            if ("§o".equals(fakeNicknameCharacter)) {
+                return "§o" + formattedNick + "§r";
+            }
+            return fakeNicknameCharacter + formattedNick;
+        }
         if (player.isOp()) {
             return "§" + opNicknameColor + player.getName() + "§r§f";
         }
@@ -147,15 +181,12 @@ public class EssentialsChat extends PluginBase implements Listener {
         if (!prefixInSettingsAndHeadEnabled) {
             return;
         }
-
         String prefix = provider.getPrefix(player);
         String suffix = provider.getSuffix(player);
-
         String displayName = prefixInSettingsAndHeadFormat
                 .replace("{prefix}", prefix)
                 .replace("{player}", getPlayerDisplayName(player))
                 .replace("{suffix}", suffix);
-
         player.setDisplayName(displayName);
         player.setNameTag(displayName);
     }
@@ -180,6 +211,10 @@ public class EssentialsChat extends PluginBase implements Listener {
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (command.getName().equalsIgnoreCase("prefix")) {
             return handlePrefixCommand(sender, args);
+        } else if (command.getName().equalsIgnoreCase("nick")) {
+            return handleNickCommand(sender, args);
+        } else if (command.getName().equalsIgnoreCase("realname")) {
+            return handleRealNameCommand(sender, args);
         }
         return false;
     }
@@ -194,12 +229,10 @@ public class EssentialsChat extends PluginBase implements Listener {
             player.sendMessage("§c%commands.generic.permission");
             return true;
         }
-
         if (!(provider instanceof LProvider)) {
             player.sendMessage(messageInvalidProvider.replace("{provider}", provider.getClass().getSimpleName()));
             return true;
         }
-
         if (args.length == 0) {
             player.sendMessage(messageInvalidUsage);
             return true;
@@ -209,19 +242,16 @@ public class EssentialsChat extends PluginBase implements Listener {
             clearPlayerPrefix(player);
             return true;
         }
-
         if (input.length() < prefixMinCharacters || input.length() > prefixMaxCharacters) {
             player.sendMessage(messagePrefixLengthError
                     .replace("{min}", String.valueOf(prefixMinCharacters))
                     .replace("{max}", String.valueOf(prefixMaxCharacters)));
             return true;
         }
-
         if (!input.matches("^[" + allowedCharactersRegex + "]+$")) {
             player.sendMessage(messagePrefixInvalidCharacters.replace("{allowed}", allowedCharactersRegex));
             return true;
         }
-
         setPlayerPrefix(player, input);
         return true;
     }
@@ -237,6 +267,80 @@ public class EssentialsChat extends PluginBase implements Listener {
         String command = "lp user " + player.getName() + " meta removeprefix 10483";
         getServer().dispatchCommand(getServer().getConsoleSender(), command);
         player.sendMessage(messagePrefixCleared);
+    }
+
+    private boolean handleNickCommand(CommandSender sender, String[] args) {
+        if (!(sender instanceof Player)) {
+            sender.sendMessage(messageCommandOnlyForPlayers);
+            return true;
+        }
+        Player player = (Player) sender;
+        if (!player.hasPermission("essentialschat.nick.setnick")) {
+            player.sendMessage("§c%commands.generic.permission");
+            return true;
+        }
+        if (args.length == 0) {
+            player.sendMessage(messageNickUsage);
+            return true;
+        }
+        String input = args[0];
+        if (input.equalsIgnoreCase("off") || input.equalsIgnoreCase("clear")) {
+            clearPlayerNick(player);
+            return true;
+        }
+        if (input.length() < minNickCharacters || input.length() > maxNickCharacters) {
+            player.sendMessage("§7> §cThe nickname must be between §4" + minNickCharacters + "§c and §4" + maxNickCharacters + "§c characters.");
+            return true;
+        }
+        if (!input.matches("^[" + allowedCharactersInNickRegex + "]+$")) {
+            player.sendMessage("§cNickname contains invalid characters! Only allowed: §4" + allowedCharactersInNickRegex);
+            return true;
+        }
+        setPlayerNick(player, input);
+        return true;
+    }
+
+    private void setPlayerNick(Player player, String nick) {
+        String formattedNick = allowColoredNick ? replaceAmpersandWithSectionSign(nick) : nick;
+        playerNicks.put(player.getName(), formattedNick);
+        updatePlayerDisplayName(player);
+
+        String displayNick = formattedNick;
+        if ("§o".equals(fakeNicknameCharacter)) {
+            displayNick = "§o" + formattedNick + "§r";
+        } else {
+            displayNick = fakeNicknameCharacter + formattedNick;
+        }
+
+        player.sendMessage(messageNickSuccess.replace("{nick}", displayNick));
+    }
+
+    private void clearPlayerNick(Player player) {
+        playerNicks.remove(player.getName());
+        updatePlayerDisplayName(player);
+        player.sendMessage(messageNickCleared);
+    }
+
+    private boolean handleRealNameCommand(CommandSender sender, String[] args) {
+        if (!sender.hasPermission("essentialschat.nick.realname")) {
+            sender.sendMessage("§c%commands.generic.permission");
+            return true;
+        }
+        if (args.length != 1) {
+            sender.sendMessage(messageRealNameUsage);
+            return true;
+        }
+        Player target = getServer().getPlayer(args[0]);
+        if (target == null) {
+            sender.sendMessage(messageRealNameNotFound);
+            return true;
+        }
+        String realName = target.getName();
+        String displayName = getPlayerDisplayName(target);
+        sender.sendMessage(messageRealNameOutput
+                .replace("{player}", displayName)
+                .replace("{nick}", realName));
+        return true;
     }
 
     private String replaceAmpersandWithSectionSign(String input) {
