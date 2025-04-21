@@ -1,6 +1,6 @@
-# Overview Reviews History Discussion
+# EssentialsChat
 
-| Compatible API Versions: | 1.0.0 |
+| Compatible API Versions: | 1.1.0, 1.0.9 |
 |---|---|
 | Sourcecode: | [GitHub](https://github.com/yourusername/EssentialsChat) |
 | Contributors: | [CrieXD1337](https://github.com/CrieXD1337) |
