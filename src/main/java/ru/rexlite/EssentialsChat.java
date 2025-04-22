@@ -73,7 +73,8 @@ public class EssentialsChat extends PluginBase implements Listener {
     private String messageRealNameOutput;
     private String messageRealNameNotFound;
     private String fakeNicknameCharacter;
-
+    private String messageNicknameAlreadyUsed;
+    private boolean allowDuplicateNicknames;
     private final Map<String, String> playerNicks = new HashMap<>();
 
     @Override
@@ -110,6 +111,17 @@ public class EssentialsChat extends PluginBase implements Listener {
         prefixMaxCharacters = config.getInt("prefix-max-characters", 15);
         prefixMinCharacters = config.getInt("prefix-min-characters", 3);
         allowedCharactersRegex = config.getString("allowed-characters", "A-Za-z0-9_-");
+        maxNickCharacters = config.getInt("max-nick-characters-length", 15);
+        minNickCharacters = config.getInt("min-nick-characters-length", 3);
+        allowedCharactersInNickRegex = config.getString("allowed-characters-in-nick", "A-Za-z0-9_-");
+        allowColoredNick = config.getBoolean("allow-colored-nick", false);
+        allowDuplicateNicknames = config.getBoolean("allow-duplicate-nicknames", false);
+        fakeNicknameCharacter = config.getString("fake-nickname-character", "~");
+        if ("BOLD".equalsIgnoreCase(fakeNicknameCharacter)) {
+            fakeNicknameCharacter = "§o";
+        } else {
+            fakeNicknameCharacter = replaceAmpersandWithSectionSign(fakeNicknameCharacter);
+        }
         messagePrefixCleared = config.getString("messages.prefix-cleared", "§7> §fYour prefix was §ccleared");
         messagePrefixSet = config.getString("messages.prefix-set", "§7> §fYour prefix successfully moved to: §b{prefix}");
         messageInvalidUsage = config.getString("messages.invalid-usage", "§7> §cUsage: /prefix <prefix|off>");
@@ -117,26 +129,17 @@ public class EssentialsChat extends PluginBase implements Listener {
         messagePrefixLengthError = config.getString("messages.prefix-length-error", "§7> §cThe prefix must be between §4{min}§c and §4{max}§c characters.");
         messagePrefixInvalidCharacters = config.getString("messages.prefix-invalid-characters", "§cPrefix contains invalid characters! Only allowed: §4{allowed}");
         messageCommandOnlyForPlayers = config.getString("messages.command-only-for-players", "§cAllowed only for players!");
-        maxNickCharacters = config.getInt("max-nick-characters-length", 15);
-        minNickCharacters = config.getInt("min-nick-characters-length", 3);
-        allowedCharactersInNickRegex = config.getString("allowed-characters-in-nick", "A-Za-z0-9_-");
-        allowColoredNick = config.getBoolean("allow-colored-nick", false);
-        fakeNicknameCharacter = config.getString("fake-nickname-character", "~");
-        if ("BOLD".equalsIgnoreCase(fakeNicknameCharacter)) {
-            fakeNicknameCharacter = "§o";
-        } else {
-            fakeNicknameCharacter = replaceAmpersandWithSectionSign(fakeNicknameCharacter);
-        }
         messageNickSuccess = config.getString("messages.nick-success", "§7> §fYour nickname changed to §b{nick}");
         messageNickCleared = config.getString("messages.nick-cleared", "§7> §fYour nickname §ccleared");
         messageNickUsage = config.getString("messages.nick-usage", "§7> §cUsage: §e/nick <nick>");
         messageRealNameUsage = config.getString("messages.realname-usage", "§7> §cUsage: §e/realname <player>");
         messageRealNameOutput = config.getString("messages.realname-output", "§7> Real name of player §b{player}: §3{nick}");
         messageRealNameNotFound = config.getString("messages.realname-not-found", "§7> §cPlayer not found");
+        messageNicknameAlreadyUsed = config.getString("messages.nickname-already-used", "§7> §cThis nickname is already used by another player!");
+
         startUpdateTimer();
-        getLogger().info("§2EssentialsChat enabled! Provider: " + provider.getClass().getSimpleName());
-        getLogger().info("§f");
-        getLogger().info("§2Plugin from: https://cloudburstmc.org/resources/essentialschat.1062/");
+        getLogger().info("§bEssentialsChat enabled! Provider: §3" + provider.getClass().getSimpleName());
+        getLogger().info("§bPlugin from:§3 https://cloudburstmc.org/resources/essentialschat.1062/");
     }
 
     @Override
@@ -308,34 +311,54 @@ public class EssentialsChat extends PluginBase implements Listener {
             return true;
         }
         String input = args[0];
+
+        if (input.equalsIgnoreCase(player.getName())) {
+            clearPlayerNick(player);
+            return true;
+        }
+
         if (input.equalsIgnoreCase("off") || input.equalsIgnoreCase("clear")) {
             clearPlayerNick(player);
             return true;
         }
+
         if (input.length() < minNickCharacters || input.length() > maxNickCharacters) {
             player.sendMessage("§7> §cThe nickname must be between §4" + minNickCharacters + "§c and §4" + maxNickCharacters + "§c characters.");
             return true;
         }
+
         if (!input.matches("^[" + allowedCharactersInNickRegex + "]+$")) {
             player.sendMessage("§cNickname contains invalid characters! Only allowed: §4" + allowedCharactersInNickRegex);
+            return true;
+        }
+
+        if (!allowDuplicateNicknames && isNicknameAlreadyUsed(input)) {
+            player.sendMessage(messageNicknameAlreadyUsed);
             return true;
         }
         setPlayerNick(player, input);
         return true;
     }
 
+    private boolean isNicknameAlreadyUsed(String nick) {
+        for (String existingNick : playerNicks.values()) {
+            if (existingNick.equalsIgnoreCase(nick)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private void setPlayerNick(Player player, String nick) {
         String formattedNick = allowColoredNick ? replaceAmpersandWithSectionSign(nick) : nick;
         playerNicks.put(player.getName(), formattedNick);
         updatePlayerDisplayName(player);
-
         String displayNick = formattedNick;
         if ("§o".equals(fakeNicknameCharacter)) {
             displayNick = "§o" + formattedNick + "§r";
         } else {
             displayNick = fakeNicknameCharacter + formattedNick;
         }
-
         player.sendMessage(messageNickSuccess.replace("{nick}", displayNick));
     }
 
