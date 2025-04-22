@@ -45,8 +45,8 @@ max-nick-characters-length: 15 # Maximum characters allowed in a nickname
 min-nick-characters-length: 3 # Minimum characters required in a nickname
 allowed-characters-in-nick: "A-Za-z0-9_-" # Allowed characters in nicknames
 allow-colored-nick: false # Allow using color codes in nicknames (e.g., &b)
-fake-nickname-character: ~ # You also can use BOLD
-
+fake-nickname-character: "~" # You also can use BOLD
+allow-duplicate-nicknames: false # Allow a player to set fake nicknames that are already used by another player
 
 # - - - - - - - - - - - - - - - #
 #       GLOBAL MESSAGES         #
