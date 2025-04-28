@@ -13,7 +13,7 @@ op-nickname-color: "4"
 
 # Local chat settings
 local-chat-radius: 100 # blocks
-local-chat-format: "§7[§aL§7] §7[{prefix}§r§7] §f{player}{suffix} §a» §8{msg}"
+local-chat-format: "§7[§aL§7] §7[{prefix}§r§7]§7 [§cHP: §e%player_health%§7] §f{player}{suffix} §a» §8{msg}"
 
 # Global chat settings
 global-chat-symbol: "!" # Type ! before your message to write to global chat
