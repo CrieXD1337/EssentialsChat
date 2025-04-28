@@ -37,12 +37,23 @@ import ru.rexlite.providers.PrefixSuffixProvider;
 import ru.rexlite.providers.LProvider;
 import ru.rexlite.providers.MultipassProvider;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
 public class EssentialsChat extends PluginBase implements Listener {
+
+    private boolean placeholderAPIEnabled = false;
+
+    private static EssentialsChat instance;
+
+    public static EssentialsChat getInstance() {
+        return instance;
+    }
+
+
     private int localChatRadius;
     private String globalChatSymbol;
     private String localChatFormat;
@@ -79,10 +90,20 @@ public class EssentialsChat extends PluginBase implements Listener {
 
     @Override
     public void onEnable() {
+        instance = this;
+
         this.getServer().getPluginManager().registerEvents(this, this);
         saveDefaultConfig();
         reloadConfig();
         Config config = getConfig();
+
+        // Check PAPI plugin
+        if (this.getServer().getPluginManager().getPlugin("PlaceholderAPI") != null) {
+            placeholderAPIEnabled = true;
+            getLogger().info("§aPlaceholderAPI was found. Placeholders support enabled.");
+        } else {
+            getLogger().error("§ePlaceholderAPI not found. Placeholders support disabled.");
+        }
 
         localChatRadius = config.getInt("local-chat-radius", 100);
         globalChatSymbol = config.getString("global-chat-symbol", "!");
@@ -136,7 +157,6 @@ public class EssentialsChat extends PluginBase implements Listener {
         messageRealNameOutput = config.getString("messages.realname-output", "§7> Real name of player §b{player}: §3{nick}");
         messageRealNameNotFound = config.getString("messages.realname-not-found", "§7> §cPlayer not found");
         messageNicknameAlreadyUsed = config.getString("messages.nickname-already-used", "§7> §cThis nickname is already used by another player!");
-
         startUpdateTimer();
         getLogger().info("§bEssentialsChat enabled! Provider: §3" + provider.getClass().getSimpleName());
         getLogger().info("§bPlugin from:§3 https://cloudburstmc.org/resources/essentialschat.1062/");
@@ -149,6 +169,31 @@ public class EssentialsChat extends PluginBase implements Listener {
         }
     }
 
+    // --- New method for PlaceholderAPI support ---
+    public static String parsePlaceholders(Player player, String text) {
+        if (text == null || text.isEmpty()) return text;
+
+        EssentialsChat plugin = getInstance();
+
+        if (!plugin.placeholderAPIEnabled) {
+            return text;
+        }
+
+        try {
+            Class<?> placeholderAPIClass = Class.forName("com.creeperface.nukkit.placeholderapi.api.PlaceholderAPI");
+            Object apiInstance = placeholderAPIClass.getMethod("getInstance").invoke(null);
+            java.lang.reflect.Method method = placeholderAPIClass.getMethod("translateString", String.class, Player.class);
+            return (String) method.invoke(apiInstance, text, player);
+        } catch (ClassNotFoundException e) {
+            plugin.getLogger().warning("§ePlaceholderAPI not found. Plugin works without placeholders!");
+            plugin.placeholderAPIEnabled = false;
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+            plugin.getLogger().error("Error #3 by PlaceholderAPI", e);
+        }
+
+        return text;
+    }
+
     @EventHandler
     public void onPlayerChat(PlayerChatEvent event) {
         if (event.isCancelled()) {
@@ -156,14 +201,13 @@ public class EssentialsChat extends PluginBase implements Listener {
         }
         Player player = event.getPlayer();
         String message = event.getMessage();
-        String prefix = provider.getPrefix(player);
-        String suffix = provider.getSuffix(player);
         String formattedMessage;
         if (message.startsWith(globalChatSymbol)) {
             formattedMessage = formatMessage(globalChatFormat, player, message.substring(globalChatSymbol.length()).trim());
         } else {
             formattedMessage = formatMessage(localChatFormat, player, message);
         }
+        formattedMessage = parsePlaceholders(player, formattedMessage); // <-- Применяем плейсхолдеры
         event.setFormat(formattedMessage);
         if (!message.startsWith(globalChatSymbol)) {
             event.getRecipients().removeIf(onlinePlayer -> {
@@ -214,6 +258,9 @@ public class EssentialsChat extends PluginBase implements Listener {
                 .replace("{prefix}", prefix)
                 .replace("{player}", getPlayerDisplayName(player))
                 .replace("{suffix}", suffix);
+
+        displayName = parsePlaceholders(player, displayName); // <-- Применяем плейсхолдеры
+
         player.setDisplayName(displayName);
         player.setNameTag(displayName);
     }
@@ -311,27 +358,22 @@ public class EssentialsChat extends PluginBase implements Listener {
             return true;
         }
         String input = args[0];
-
         if (input.equalsIgnoreCase(player.getName())) {
             clearPlayerNick(player);
             return true;
         }
-
         if (input.equalsIgnoreCase("off") || input.equalsIgnoreCase("clear")) {
             clearPlayerNick(player);
             return true;
         }
-
         if (input.length() < minNickCharacters || input.length() > maxNickCharacters) {
             player.sendMessage("§7> §cThe nickname must be between §4" + minNickCharacters + "§c and §4" + maxNickCharacters + "§c characters.");
             return true;
         }
-
         if (!input.matches("^[" + allowedCharactersInNickRegex + "]+$")) {
             player.sendMessage("§cNickname contains invalid characters! Only allowed: §4" + allowedCharactersInNickRegex);
             return true;
         }
-
         if (!allowDuplicateNicknames && isNicknameAlreadyUsed(input)) {
             player.sendMessage(messageNicknameAlreadyUsed);
             return true;
