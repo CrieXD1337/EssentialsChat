@@ -20,7 +20,7 @@ It offers:
 - **Provider Support** - Compatibility with LuckPerms and Multipass for permission integration
 - **OP Recognition** - Special name coloring for server operators
 - **RealName Utility** - Command to reveal real player names behind nicknames
-- **Performance** - Efficient implementation with regular display name updates
+- **More placeholders** - This plugin supports PlaceholderAPI placeholders
 
 For server administrators looking to enhance their server's chat experience with essential features.
 
