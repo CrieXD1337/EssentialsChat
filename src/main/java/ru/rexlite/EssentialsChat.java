@@ -1,27 +1,3 @@
-/*
- * This file is part of EssentialsChat, licensed under the MIT License.
- *
- *  Copyright (c) Ivan [CrieXD1337] <criex1337@gmail.com>
- *  Copyright (c) contributors
- *
- *  Permission is hereby granted, free of charge, to any person obtaining a copy
- *  of this software and associated documentation files (the "Software"), to deal
- *  in the Software without restriction, including without limitation the rights
- *  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- *  copies of the Software, and to permit persons to whom the Software is
- *  furnished to do so, subject to the following conditions:
- *
- *  The above copyright notice and this permission notice shall be included in all
- *  copies or substantial portions of the Software.
- *
- *  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- *  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- *  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- *  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- *  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- *  SOFTWARE.
- */
 package ru.rexlite;
 
 import cn.nukkit.Player;
@@ -39,20 +15,21 @@ import ru.rexlite.providers.MultipassProvider;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.stream.Collectors;
 
 public class EssentialsChat extends PluginBase implements Listener {
-
     private boolean placeholderAPIEnabled = false;
-
     private static EssentialsChat instance;
+    private List<String> nicknameBlacklist;
+    private List<String> prefixBlacklist;
 
     public static EssentialsChat getInstance() {
         return instance;
     }
-
 
     private int localChatRadius;
     private String globalChatSymbol;
@@ -80,6 +57,8 @@ public class EssentialsChat extends PluginBase implements Listener {
     private String messageNickSuccess;
     private String messageNickCleared;
     private String messageNickUsage;
+    private String messageNickBlackList;
+    private String messagePrefixBlackList;
     private String messageRealNameUsage;
     private String messageRealNameOutput;
     private String messageRealNameNotFound;
@@ -91,20 +70,25 @@ public class EssentialsChat extends PluginBase implements Listener {
     @Override
     public void onEnable() {
         instance = this;
-
         this.getServer().getPluginManager().registerEvents(this, this);
         saveDefaultConfig();
         reloadConfig();
         Config config = getConfig();
 
-        // Check PAPI plugin
+        // Загрузка черных списков
+        nicknameBlacklist = config.getStringList("nicknames-blacklist").stream()
+                .map(String::toLowerCase)
+                .collect(Collectors.toList());
+        prefixBlacklist = config.getStringList("prefixes-blacklist").stream()
+                .map(String::toLowerCase)
+                .collect(Collectors.toList());
+
         if (this.getServer().getPluginManager().getPlugin("PlaceholderAPI") != null) {
             placeholderAPIEnabled = true;
             getLogger().info("§aPlaceholderAPI was found. Placeholders support enabled.");
         } else {
             getLogger().error("§ePlaceholderAPI not found. Placeholders support disabled.");
         }
-
         localChatRadius = config.getInt("local-chat-radius", 100);
         globalChatSymbol = config.getString("global-chat-symbol", "!");
         localChatFormat = config.getString("local-chat-format", "§7[§aL§7] §7[{prefix}§r§7] §f{player}{suffix} §a» §8{msg}");
@@ -127,7 +111,7 @@ public class EssentialsChat extends PluginBase implements Listener {
         opNicknameColor = config.getString("op-nickname-color", "c");
         if (!isValidMinecraftColor(opNicknameColor)) {
             getLogger().warning("§cUnsupported color format in op-nickname-color: §4" + opNicknameColor + "§c. Moved to default value: §44");
-            opNicknameColor = "4"; // Default value
+            opNicknameColor = "4";
         }
         prefixMaxCharacters = config.getInt("prefix-max-characters", 15);
         prefixMinCharacters = config.getInt("prefix-min-characters", 3);
@@ -149,10 +133,12 @@ public class EssentialsChat extends PluginBase implements Listener {
         messageInvalidProvider = config.getString("messages.invalid-provider", "§7> §cProvider §4{provider} §cis currently not available for prefixes. Use §4LuckPerms.");
         messagePrefixLengthError = config.getString("messages.prefix-length-error", "§7> §cThe prefix must be between §4{min}§c and §4{max}§c characters.");
         messagePrefixInvalidCharacters = config.getString("messages.prefix-invalid-characters", "§cPrefix contains invalid characters! Only allowed: §4{allowed}");
+        messagePrefixBlackList = config.getString("messages.prefix-in-blacklist");
         messageCommandOnlyForPlayers = config.getString("messages.command-only-for-players", "§cAllowed only for players!");
         messageNickSuccess = config.getString("messages.nick-success", "§7> §fYour nickname changed to §b{nick}");
         messageNickCleared = config.getString("messages.nick-cleared", "§7> §fYour nickname §ccleared");
         messageNickUsage = config.getString("messages.nick-usage", "§7> §cUsage: §e/nick <nick>");
+        messageNickBlackList = config.getString("messages.nick-in-blacklist");
         messageRealNameUsage = config.getString("messages.realname-usage", "§7> §cUsage: §e/realname <player>");
         messageRealNameOutput = config.getString("messages.realname-output", "§7> Real name of player §b{player}: §3{nick}");
         messageRealNameNotFound = config.getString("messages.realname-not-found", "§7> §cPlayer not found");
@@ -169,16 +155,12 @@ public class EssentialsChat extends PluginBase implements Listener {
         }
     }
 
-    // --- New method for PlaceholderAPI support ---
     public static String parsePlaceholders(Player player, String text) {
         if (text == null || text.isEmpty()) return text;
-
         EssentialsChat plugin = getInstance();
-
         if (!plugin.placeholderAPIEnabled) {
             return text;
         }
-
         try {
             Class<?> placeholderAPIClass = Class.forName("com.creeperface.nukkit.placeholderapi.api.PlaceholderAPI");
             Object apiInstance = placeholderAPIClass.getMethod("getInstance").invoke(null);
@@ -190,7 +172,6 @@ public class EssentialsChat extends PluginBase implements Listener {
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
             plugin.getLogger().error("Error #3 by PlaceholderAPI", e);
         }
-
         return text;
     }
 
@@ -207,7 +188,7 @@ public class EssentialsChat extends PluginBase implements Listener {
         } else {
             formattedMessage = formatMessage(localChatFormat, player, message);
         }
-        formattedMessage = parsePlaceholders(player, formattedMessage); // <-- Применяем плейсхолдеры
+        formattedMessage = parsePlaceholders(player, formattedMessage);
         event.setFormat(formattedMessage);
         if (!message.startsWith(globalChatSymbol)) {
             event.getRecipients().removeIf(onlinePlayer -> {
@@ -258,9 +239,7 @@ public class EssentialsChat extends PluginBase implements Listener {
                 .replace("{prefix}", prefix)
                 .replace("{player}", getPlayerDisplayName(player))
                 .replace("{suffix}", suffix);
-
-        displayName = parsePlaceholders(player, displayName); // <-- Применяем плейсхолдеры
-
+        displayName = parsePlaceholders(player, displayName);
         player.setDisplayName(displayName);
         player.setNameTag(displayName);
     }
@@ -316,6 +295,10 @@ public class EssentialsChat extends PluginBase implements Listener {
             clearPlayerPrefix(player);
             return true;
         }
+        if (prefixBlacklist.contains(input.toLowerCase())) {
+            player.sendMessage(messagePrefixBlackList);
+            return true;
+        }
         if (input.length() < prefixMinCharacters || input.length() > prefixMaxCharacters) {
             player.sendMessage(messagePrefixLengthError
                     .replace("{min}", String.valueOf(prefixMinCharacters))
@@ -364,6 +347,10 @@ public class EssentialsChat extends PluginBase implements Listener {
         }
         if (input.equalsIgnoreCase("off") || input.equalsIgnoreCase("clear")) {
             clearPlayerNick(player);
+            return true;
+        }
+        if (nicknameBlacklist.contains(input.toLowerCase())) {
+            player.sendMessage(messageNickBlackList);
             return true;
         }
         if (input.length() < minNickCharacters || input.length() > maxNickCharacters) {
@@ -419,7 +406,18 @@ public class EssentialsChat extends PluginBase implements Listener {
             sender.sendMessage(messageRealNameUsage);
             return true;
         }
-        Player target = getServer().getPlayer(args[0]);
+        String input = args[0];
+        Player target = getServer().getPlayer(input);
+        if (target == null) {
+            for (Map.Entry<String, String> entry : playerNicks.entrySet()) {
+                String realName = entry.getKey();
+                String fakeNick = entry.getValue();
+                if (fakeNick.equalsIgnoreCase(input)) {
+                    target = getServer().getPlayer(realName);
+                    break;
+                }
+            }
+        }
         if (target == null) {
             sender.sendMessage(messageRealNameNotFound);
             return true;
@@ -434,5 +432,13 @@ public class EssentialsChat extends PluginBase implements Listener {
 
     private String replaceAmpersandWithSectionSign(String input) {
         return input.replace('&', '§');
+    }
+
+    public List<String> getNicknameBlacklist() {
+        return nicknameBlacklist;
+    }
+
+    public List<String> getPrefixBlacklist() {
+        return prefixBlacklist;
     }
 }
