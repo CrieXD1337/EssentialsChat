@@ -13,7 +13,7 @@ op-nickname-color: "4"
 
 # Local chat settings
 local-chat-radius: 100 # blocks
-local-chat-format: "§7[§aL§7] §7[{prefix}§r§7]§7 [§cHP: §e%player_health%§7] §f{player}{suffix} §a» §8{msg}"
+local-chat-format: "§7[§aL§7] §7[{prefix}§r§7] §f{player}{suffix} §a» §8{msg}"
 
 # Global chat settings
 global-chat-symbol: "!" # Type ! before your message to write to global chat
@@ -37,6 +37,14 @@ prefix-min-characters: 3
 # Enabled charters in prefix
 allowed-characters: "A-Za-z0-9_-"
 
+# Banned prefixes
+prefixes-blacklist:
+  - admin
+  - creator
+  - owner
+  - moderator
+  - administrator
+
 # - - - - - - - - - - - - - - - #
 #        /nick command          #
 # - - - - - - - - - - - - - - - #
@@ -47,6 +55,13 @@ allowed-characters-in-nick: "A-Za-z0-9_-" # Allowed characters in nicknames
 allow-colored-nick: false # Allow using color codes in nicknames (e.g., &b)
 fake-nickname-character: "~" # You also can use BOLD
 allow-duplicate-nicknames: false # Allow a player to set fake nicknames that are already used by another player
+# Banned nicknames
+nicknames-blacklist:
+  - admin
+  - creator
+  - owner
+  - moderator
+  - administrator
 
 # - - - - - - - - - - - - - - - #
 #       GLOBAL MESSAGES         #
@@ -61,11 +76,13 @@ messages:
   prefix-length-error: "§7> §cThe prefix must be between §4{min}§c and §4{max}§c characters."
   prefix-invalid-characters: "§cPrefix contains invalid characters! Only allowed: §4{allowed}"
   command-only-for-players: "§cAllowed only for players!"
+  prefix-in-blacklist: "§7> §cThis prefix is banned!"
 
   # Nickname command messages
   nick-success: "§7> §fYour nickname changed to §b{nick}"
   nick-cleared: "§7> §fYour nickname §ccleared"
   nick-usage: "§7> §cUsage: §e/nick <nick>"
+  nick-in-blacklist: "§7> §cThis nickname is banned!"
 
   # Realname command messages
   realname-usage: "§7> §cUsage: §e/realname <player>"
