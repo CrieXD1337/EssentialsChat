@@ -75,7 +75,7 @@ public class EssentialsChat extends PluginBase implements Listener {
         reloadConfig();
         Config config = getConfig();
 
-        // Загрузка черных списков
+        // Blacklist load
         nicknameBlacklist = config.getStringList("nicknames-blacklist").stream()
                 .map(String::toLowerCase)
                 .collect(Collectors.toList());
