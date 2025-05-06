@@ -3,7 +3,7 @@
 | Compatible API Versions: | 1.1.0, 1.0.9 |
 |---|---|
 | Sourcecode: | [GitHub](https://github.com/CrieXD1337/EssentialsChat) |
-| Contributors: | [CrieXD1337](https://github.com/CrieXD1337) |
+| Contributors: | [Contributors page](https://github.com/CrieXD1337/EssentialsChat/graphs/contributors) |
 
 ---
 
