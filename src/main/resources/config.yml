@@ -5,13 +5,11 @@
 # Providers: LuckPerms, Multipass
 provider: "LuckPerms"
 
-# BETA option, do not edit
-clan-provider: "none"
-
 # Color for OP players. For example, b = §b
 op-nickname-color: "4"
 
 # Local chat settings
+# If you use ClanSystemMX plugin - you can use placeholder %clantag% to display clan tag.
 local-chat-radius: 100 # blocks
 local-chat-format: "§7[§aL§7] §7[{prefix}§r§7] §f{player}{suffix} §a» §8{msg}"
 
@@ -64,6 +62,17 @@ nicknames-blacklist:
   - administrator
 
 # - - - - - - - - - - - - - - - #
+#        CHAT FILTERING         #
+# - - - - - - - - - - - - - - - #
+
+chat-filtering:
+  enabled: true
+  cooldown-for-messages: 3 # seconds
+  max-message-characters: 200
+  max-messages-repetition: 5
+
+
+# - - - - - - - - - - - - - - - #
 #       GLOBAL MESSAGES         #
 # - - - - - - - - - - - - - - - #
 messages:
@@ -88,3 +97,9 @@ messages:
   realname-usage: "§7> §cUsage: §e/realname <player>"
   realname-output: "§7> §fReal name of player §b{player}: §3{nick}"
   realname-not-found: "§7> §cPlayer not found!"
+
+  # Chat filtering
+  cooldown-for-messages: "§7> §cWait §b{seconds} §cseconds"
+  max-message-characters: "§7> §cMaximum characters in message - §b{max}§c!"
+  max-messages-repetition: "§7> §cYou are sending the same message too many times!"
+
