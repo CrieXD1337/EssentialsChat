@@ -1,9 +1,13 @@
 name: ${pom.artifactId}
 version: ${pom.version}
 main: ru.rexlite.EssentialsChat
-api: ["1.1.0", "1.0.9"]
-softdepend: [LuckPerms, Multipass]
-author: "Criex, rexl1te"
+api: ["1.1.0", "1.0.14"]
+depend:
+  - "PlaceholderAPI"
+softdepend: 
+  - "LuckPerms"
+  - "Multipass"
+author: "Criex"
 description: Chat plugin with global and local chat support for LuckPerms or Multipass
 commands:
   prefix:
