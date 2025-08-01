@@ -22,28 +22,18 @@
  *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  *  SOFTWARE.
  */
-package ru.rexlite.managers;
+package ru.rexlite.providers;
 
 import cn.nukkit.Player;
-import ru.rexlite.EssentialsChat;
-import ru.rexlite.providers.PrefixSuffixProvider;
 
-public class ChatManager {
-    private final PrefixSuffixProvider provider;
-
-    public ChatManager(PrefixSuffixProvider provider) {
-        this.provider = provider;
+public class FallbackProvider implements PrefixSuffixProvider {
+    @Override
+    public String getPrefix(Player player) {
+        return "";
     }
 
-    public String formatChatMessage(Player player, String format, String message) {
-        String prefix = provider.getPrefix(player);
-        String suffix = provider.getSuffix(player);
-        String nick = EssentialsChat.getInstance().getNickManager().getPlayerNick(player);
-        String name = nick != null ? EssentialsChat.getInstance().formatNick(nick) : player.getName();
-        return format
-                .replace("{prefix}", prefix != null ? prefix : "")
-                .replace("{player}", name)
-                .replace("{suffix}", suffix != null ? suffix : "")
-                .replace("{msg}", message);
+    @Override
+    public String getSuffix(Player player) {
+        return "";
     }
 }

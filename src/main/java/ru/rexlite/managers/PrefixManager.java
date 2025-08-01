@@ -25,17 +25,11 @@
 package ru.rexlite.managers;
 
 import cn.nukkit.Player;
-import net.luckperms.api.LuckPerms;
-import net.luckperms.api.LuckPermsProvider;
-import net.luckperms.api.model.user.User;
-import net.luckperms.api.node.Node;
-import net.luckperms.api.node.NodeType;
-import net.luckperms.api.node.types.PrefixNode;
+import ru.nukkit.multipass.Multipass;
 import ru.rexlite.EssentialsChat;
 import ru.rexlite.providers.LProvider;
+import ru.rexlite.providers.MultipassProvider;
 import ru.rexlite.providers.PrefixSuffixProvider;
-
-import java.util.concurrent.CompletableFuture;
 
 public class PrefixManager {
     private final EssentialsChat plugin;
@@ -47,30 +41,75 @@ public class PrefixManager {
     }
 
     public void setPlayerPrefix(Player player, String prefix) {
+        String formattedPrefix = prefix.replace("&", "§");
         if (provider instanceof LProvider) {
-            LuckPerms api = LuckPermsProvider.get();
-            String formattedPrefix = prefix.replace("&", "§");
-            CompletableFuture<User> userFuture = api.getUserManager().loadUser(player.getUniqueId());
-            userFuture.thenAccept(user -> {
-                if (user != null) {
-                    Node prefixNode = PrefixNode.builder(formattedPrefix, 126483).build();
-                    user.data().add(prefixNode);
-                    api.getUserManager().saveUser(user);
-                }
-            });
+            try {
+                Class<?> luckPermsClass = Class.forName("net.luckperms.api.LuckPerms");
+                Object api = luckPermsClass.getMethod("getProvider").invoke(null);
+                Object userManager = luckPermsClass.getMethod("getUserManager").invoke(api);
+                Object userFuture = userManager.getClass().getMethod("loadUser", java.util.UUID.class).invoke(userManager, player.getUniqueId());
+                ((java.util.concurrent.CompletableFuture<?>) userFuture).thenAccept(user -> {
+                    if (user != null) {
+                        try {
+                            Class<?> prefixNodeClass = Class.forName("net.luckperms.api.node.types.PrefixNode");
+                            Object prefixNode = prefixNodeClass.getMethod("builder", String.class, int.class)
+                                    .invoke(null, formattedPrefix, 126483);
+                            user.getClass().getMethod("data").invoke(user).getClass().getMethod("add", Class.forName("net.luckperms.api.node.Node")).invoke(user.getClass().getMethod("data").invoke(user), prefixNode);
+                            userManager.getClass().getMethod("saveUser", user.getClass()).invoke(userManager, user);
+                        } catch (Exception e) {
+                            plugin.getLogger().warning("Failed to set LuckPerms prefix: " + e.getMessage());
+                        }
+                    }
+                });
+            } catch (ClassNotFoundException | NoClassDefFoundError e) {
+                plugin.getLogger().warning("LuckPerms not found when trying to set prefix!");
+            } catch (Exception e) {
+                plugin.getLogger().warning("Error setting LuckPerms prefix: " + e.getMessage());
+            }
+        } else if (provider instanceof MultipassProvider) {
+            try {
+                Multipass.setPlayerPrefix(player, formattedPrefix, null, 100);
+            } catch (Exception e) {
+                plugin.getLogger().warning("Failed to set prefix with Multipass: " + e.getMessage());
+            }
         }
     }
 
     public void clearPlayerPrefix(Player player) {
         if (provider instanceof LProvider) {
-            LuckPerms api = LuckPermsProvider.get();
-            CompletableFuture<User> userFuture = api.getUserManager().loadUser(player.getUniqueId());
-            userFuture.thenAccept(user -> {
-                if (user != null) {
-                    user.data().clear(NodeType.PREFIX::matches);
-                    api.getUserManager().saveUser(user);
-                }
-            });
+            try {
+                Class<?> luckPermsClass = Class.forName("net.luckperms.api.LuckPerms");
+                Object api = luckPermsClass.getMethod("getProvider").invoke(null);
+                Object userManager = luckPermsClass.getMethod("getUserManager").invoke(api);
+                Object userFuture = userManager.getClass().getMethod("loadUser", java.util.UUID.class).invoke(userManager, player.getUniqueId());
+                ((java.util.concurrent.CompletableFuture<?>) userFuture).thenAccept(user -> {
+                    if (user != null) {
+                        try {
+                            Object data = user.getClass().getMethod("data").invoke(user);
+                            data.getClass().getMethod("clear", java.util.function.Predicate.class).invoke(data, (java.util.function.Predicate<?>) node -> {
+                                try {
+                                    return node.getClass().getMethod("getType").invoke(node).toString().equals("PREFIX");
+                                } catch (Exception e) {
+                                    return false;
+                                }
+                            });
+                            userManager.getClass().getMethod("saveUser", user.getClass()).invoke(userManager, user);
+                        } catch (Exception e) {
+                            plugin.getLogger().warning("Failed to clear LuckPerms prefix: " + e.getMessage());
+                        }
+                    }
+                });
+            } catch (ClassNotFoundException | NoClassDefFoundError e) {
+                plugin.getLogger().warning("LuckPerms not found when trying to clear prefix!");
+            } catch (Exception e) {
+                plugin.getLogger().warning("Error clearing LuckPerms prefix: " + e.getMessage());
+            }
+        } else if (provider instanceof MultipassProvider) {
+            try {
+                Multipass.setPlayerPrefix(player, "", null, 100);
+            } catch (Exception e) {
+                plugin.getLogger().warning("Failed to clear prefix with Multipass: " + e.getMessage());
+            }
         }
     }
 }

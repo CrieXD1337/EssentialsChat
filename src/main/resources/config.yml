@@ -51,7 +51,7 @@ max-nick-characters-length: 15 # Maximum characters allowed in a nickname
 min-nick-characters-length: 3 # Minimum characters required in a nickname
 allowed-characters-in-nick: "A-Za-z0-9_-" # Allowed characters in nicknames
 allow-colored-nick: false # Allow using color codes in nicknames (e.g., &b)
-fake-nickname-character: "~" # You also can use BOLD
+fake-nickname-character: "~" # You also can use ITALIC or BOLD
 allow-duplicate-nicknames: false # Allow a player to set fake nicknames that are already used by another player
 # Banned nicknames
 nicknames-blacklist:
@@ -80,7 +80,7 @@ messages:
   # Prefix command messages
   prefix-cleared: "§7> §fYour prefix was §ccleared"
   prefix-set: "§7> §fYour prefix successfully moved to: §b{prefix}"
-  invalid-usage: "§7> §cUsage: /prefix <prefix|off>"
+  invalid-usage: "§7> §cUsage: §e/prefix <prefix|off>"
   invalid-provider: "§7> §cProvider §4{provider} §cis currently not available for prefixes. Use §4LuckPerms."
   prefix-length-error: "§7> §cThe prefix must be between §4{min}§c and §4{max}§c characters."
   prefix-invalid-characters: "§cPrefix contains invalid characters! Only allowed: §4{allowed}"

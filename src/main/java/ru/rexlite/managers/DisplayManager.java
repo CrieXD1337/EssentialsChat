@@ -44,9 +44,9 @@ public class DisplayManager {
         String nick = plugin.getNickManager().getPlayerNick(player);
         String name = nick != null ? plugin.formatNick(nick) : player.getName();
         String display = plugin.getPrefixInSettingsAndHeadFormat()
-                .replace("{prefix}", prefix)
+                .replace("{prefix}", prefix != null ? prefix : "")
                 .replace("{player}", name)
-                .replace("{suffix}", suffix);
+                .replace("{suffix}", suffix != null ? suffix : "");
         display = plugin.parsePlaceholders(player, display);
         player.setDisplayName(display);
         player.setNameTag(display);

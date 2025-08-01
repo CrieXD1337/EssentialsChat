@@ -31,11 +31,19 @@ public class MultipassProvider implements PrefixSuffixProvider {
 
     @Override
     public String getPrefix(Player player) {
-        return Multipass.getPrefix(player);
+        try {
+            return Multipass.getPrefix(player);
+        } catch (Exception e) {
+            return "";
+        }
     }
 
     @Override
     public String getSuffix(Player player) {
-        return Multipass.getSuffix(player);
+        try {
+            return Multipass.getSuffix(player);
+        } catch (Exception e) {
+            return "";
+        }
     }
 }

@@ -39,6 +39,7 @@ import ru.rexlite.managers.ChatManager;
 import ru.rexlite.managers.DisplayManager;
 import ru.rexlite.managers.NickManager;
 import ru.rexlite.managers.PrefixManager;
+import ru.rexlite.providers.FallbackProvider;
 import ru.rexlite.providers.LProvider;
 import ru.rexlite.providers.MultipassProvider;
 import ru.rexlite.providers.PrefixSuffixProvider;
@@ -53,6 +54,7 @@ public class EssentialsChat extends PluginBase implements Listener {
 
     private PrefixSuffixProvider provider;
     private boolean placeholderAPIEnabled = false;
+    private boolean prefixProviderEnabled = false;
 
     // Managers
     private NickManager nickManager;
@@ -113,17 +115,28 @@ public class EssentialsChat extends PluginBase implements Listener {
         reloadConfig();
         Config config = getConfig();
 
-        // Blacklist reading
-        nicknameBlacklist = config.getStringList("nicknames-blacklist").stream().map(String::toLowerCase).collect(Collectors.toList());
-        prefixBlacklist = config.getStringList("prefixes-blacklist").stream().map(String::toLowerCase).collect(Collectors.toList());
+        // Check for prefix providers
+        if (getServer().getPluginManager().getPlugin("LuckPerms") != null) {
+            prefixProviderEnabled = true;
+            getLogger().info("§aLuckPerms connected.");
+        } else if (getServer().getPluginManager().getPlugin("Multipass") != null) {
+            prefixProviderEnabled = true;
+            getLogger().info("§aMultipass connected.");
+        } else {
+            getLogger().warning("§eNo prefix provider found! Prefix support disabled.");
+        }
 
         // PAPI Checker
         if (getServer().getPluginManager().getPlugin("PlaceholderAPI") != null) {
             placeholderAPIEnabled = true;
-            getLogger().info("§aPlaceholderAPI подключён.");
+            getLogger().info("§aPlaceholderAPI connected.");
         } else {
-            getLogger().warning("§ePlaceholderAPI не найден. Поддержка отключена.");
+            getLogger().warning("§ePlaceholderAPI not found. Support disabled.");
         }
+
+        // Blacklist reading
+        nicknameBlacklist = config.getStringList("nicknames-blacklist").stream().map(String::toLowerCase).collect(Collectors.toList());
+        prefixBlacklist = config.getStringList("prefixes-blacklist").stream().map(String::toLowerCase).collect(Collectors.toList());
 
         // Settings
         localChatRadius = config.getInt("local-chat-radius", 100);
@@ -146,7 +159,7 @@ public class EssentialsChat extends PluginBase implements Listener {
         else fakeNicknameCharacter = fakeNicknameCharacter.replace('&', '§');
         opNicknameColor = config.getString("op-nickname-color", "c");
         if (!opNicknameColor.matches("[0-9a-f]")) {
-            getLogger().warning("Неверный цвет OP. Установлено по умолчанию: 4");
+            getLogger().warning("Invalid OP color. Default set: 4");
             opNicknameColor = "4";
         }
 
@@ -178,19 +191,25 @@ public class EssentialsChat extends PluginBase implements Listener {
         msgTooManyRepeat = config.getString("messages.max-messages-repetition", "§7> §cYou are sending the same message too many times!");
 
         // Provider select
-        String providerName = config.getString("provider", "LuckPerms");
-        switch (providerName.toLowerCase()) {
-            case "luckperms":
-                provider = new LProvider();
-                break;
-            case "multipass":
+        String providerName = config.getString("provider", "Multipass");
+        if (prefixProviderEnabled) {
+            if (providerName.equalsIgnoreCase("Multipass") && getServer().getPluginManager().getPlugin("Multipass") != null) {
                 provider = new MultipassProvider();
-                break;
-            default:
-                getLogger().error("Неизвестный провайдер: " + providerName + ". Используется LuckPerms.");
-                provider = new LProvider();
-                break;
+            } else if (providerName.equalsIgnoreCase("LuckPerms") && getServer().getPluginManager().getPlugin("LuckPerms") != null) {
+                try {
+                    provider = new LProvider();
+                } catch (NoClassDefFoundError e) {
+                    getLogger().warning("§eLuckPerms classes not found! Falling back to Multipass or Fallback provider.");
+                    provider = getServer().getPluginManager().getPlugin("Multipass") != null ? new MultipassProvider() : new FallbackProvider();
+                }
+            } else {
+                provider = new FallbackProvider();
+                getLogger().warning("§eSpecified provider not found. Using fallback provider.");
+            }
+        } else {
+            provider = new FallbackProvider();
         }
+
         nickManager = new NickManager(this);
         prefixManager = new PrefixManager(this, provider);
         displayManager = new DisplayManager(this, provider);
@@ -200,7 +219,7 @@ public class EssentialsChat extends PluginBase implements Listener {
         // Event registration
         getServer().getPluginManager().registerEvents(this, this);
         startUpdateTimer();
-        getLogger().info("§aEssentialsChat загружен. Провайдер: §e" + provider.getClass().getSimpleName());
+        getLogger().info("§aEssentialsChat loaded. Provider: §e" + provider.getClass().getSimpleName());
     }
 
     @Override
@@ -216,8 +235,8 @@ public class EssentialsChat extends PluginBase implements Listener {
                 return true;
             }
             Player player = (Player) sender;
-            if (!(provider instanceof LProvider)) {
-                player.sendMessage(msgInvalidProvider.replace("{provider}", provider.getClass().getSimpleName()));
+            if (!prefixProviderEnabled) {
+                player.sendMessage("§cPrefixes disabled: No prefix provider installed.");
                 return true;
             }
             if (args.length == 0) {
@@ -315,7 +334,6 @@ public class EssentialsChat extends PluginBase implements Listener {
         return fakeNicknameCharacter + nick;
     }
 
-
     @EventHandler
     public void onPlayerChat(PlayerChatEvent event) {
         if (event.isCancelled()) return;
@@ -367,11 +385,11 @@ public class EssentialsChat extends PluginBase implements Listener {
         event.setFormat(formatted);
     }
 
-
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
         displayManager.updateDisplay(event.getPlayer());
     }
+
     private void startUpdateTimer() {
         updateTimer = new Timer();
         updateTimer.schedule(new TimerTask() {
