@@ -70,36 +70,3 @@ chat-filtering:
   cooldown-for-messages: 3 # seconds
   max-message-characters: 200
   max-messages-repetition: 5
-
-
-# - - - - - - - - - - - - - - - #
-#       GLOBAL MESSAGES         #
-# - - - - - - - - - - - - - - - #
-messages:
-
-  # Prefix command messages
-  prefix-cleared: "§7> §fYour prefix was §ccleared"
-  prefix-set: "§7> §fYour prefix successfully moved to: §b{prefix}"
-  invalid-usage: "§7> §cUsage: §e/prefix <prefix|off>"
-  invalid-provider: "§7> §cProvider §4{provider} §cis currently not available for prefixes. Use §4LuckPerms."
-  prefix-length-error: "§7> §cThe prefix must be between §4{min}§c and §4{max}§c characters."
-  prefix-invalid-characters: "§cPrefix contains invalid characters! Only allowed: §4{allowed}"
-  command-only-for-players: "§cAllowed only for players!"
-  prefix-in-blacklist: "§7> §cThis prefix is banned!"
-
-  # Nickname command messages
-  nick-success: "§7> §fYour nickname changed to §b{nick}"
-  nick-cleared: "§7> §fYour nickname §ccleared"
-  nick-usage: "§7> §cUsage: §e/nick <nick>"
-  nick-in-blacklist: "§7> §cThis nickname is banned!"
-
-  # Realname command messages
-  realname-usage: "§7> §cUsage: §e/realname <player>"
-  realname-output: "§7> §fReal name of player §b{player}: §3{nick}"
-  realname-not-found: "§7> §cPlayer not found!"
-
-  # Chat filtering
-  cooldown-for-messages: "§7> §cWait §b{seconds} §cseconds"
-  max-message-characters: "§7> §cMaximum characters in message - §b{max}§c!"
-  max-messages-repetition: "§7> §cYou are sending the same message too many times!"
-

@@ -112,6 +112,8 @@ public class EssentialsChat extends PluginBase implements Listener {
         instance = this;
 
         saveDefaultConfig();
+        saveResource("messages.yml");
+        Config messagesConfig = new Config(getDataFolder() + "/messages.yml", Config.YAML);
         reloadConfig();
         Config config = getConfig();
 
@@ -170,25 +172,25 @@ public class EssentialsChat extends PluginBase implements Listener {
         chatMaxRepeat = config.getInt("chat-filtering.max-messages-repetition", 5);
 
         // Messages
-        msgPrefixSet = config.getString("messages.prefix-set");
-        msgPrefixCleared = config.getString("messages.prefix-cleared");
-        msgPrefixUsage = config.getString("messages.invalid-usage");
-        msgInvalidProvider = config.getString("messages.invalid-provider");
-        msgPrefixLengthError = config.getString("messages.prefix-length-error");
-        msgPrefixInvalidChars = config.getString("messages.prefix-invalid-characters");
-        msgPrefixBlackList = config.getString("messages.prefix-in-blacklist");
-        msgCmdOnlyForPlayers = config.getString("messages.command-only-for-players");
-        msgNickSuccess = config.getString("messages.nick-success");
-        msgNickCleared = config.getString("messages.nick-cleared");
-        msgNickUsage = config.getString("messages.nick-usage");
-        msgNickBlackList = config.getString("messages.nick-in-blacklist");
-        msgRealNameUsage = config.getString("messages.realname-usage");
-        msgRealNameOutput = config.getString("messages.realname-output");
-        msgRealNameNotFound = config.getString("messages.realname-not-found");
-        msgNickUsed = config.getString("messages.nickname-already-used");
-        msgCooldown = config.getString("messages.cooldown-for-messages", "§7> §cWait §b{seconds} §cseconds");
-        msgTooLong = config.getString("messages.max-message-characters", "§7> §cMaximum characters in message - §b{max}§c!");
-        msgTooManyRepeat = config.getString("messages.max-messages-repetition", "§7> §cYou are sending the same message too many times!");
+        msgPrefixSet = messagesConfig.getString("prefix-set", "§7> §fYour prefix successfully moved to: §b{prefix}");
+        msgPrefixCleared = messagesConfig.getString("prefix-cleared", "§7> §fYour prefix was §ccleared");
+        msgInvalidProvider = messagesConfig.getString("invalid-provider", "§7> §cProvider §4{provider} §cis currently not available for prefixes. Use §4LuckPerms.");
+        msgPrefixBlackList = messagesConfig.getString("prefix-in-blacklist", "§7> §cThis prefix is banned!");
+        msgNickSuccess = messagesConfig.getString("nick-success", "§7> §fYour nickname changed to §b{nick}");
+        msgNickCleared = messagesConfig.getString("nick-cleared", "§7> §fYour nickname §ccleared");
+        msgNickBlackList = messagesConfig.getString("nick-in-blacklist", "§7> §cThis nickname is banned!");
+        msgNickUsed = messagesConfig.getString("nick-used", "§7> §cThis nickname is already in use!");
+        msgNickUsage = messagesConfig.getString("nick-usage", "§7> §cUsage: §e/nick <nick>");
+        msgRealNameUsage = messagesConfig.getString("realname-usage", "§7> §cUsage: §e/realname <player>");
+        msgRealNameOutput = messagesConfig.getString("realname-output", "§7> §fReal name of player §b{player}: §3{nick}");
+        msgRealNameNotFound = messagesConfig.getString("realname-not-found", "§7> §cPlayer not found!");
+        msgPrefixLengthError = messagesConfig.getString("prefix-length-error", "§7> §cThe prefix must be between §4{min}§c and §4{max}§c characters.");
+        msgPrefixInvalidChars = messagesConfig.getString("prefix-invalid-characters", "§cPrefix contains invalid characters! Only allowed: §4{allowed}");
+        msgCmdOnlyForPlayers = messagesConfig.getString("command-only-for-players", "§cAllowed only for players!");
+        msgPrefixUsage = messagesConfig.getString("invalid-usage", "§7> §cUsage: §e/prefix <prefix|off>");
+        msgCooldown = messagesConfig.getString("cooldown-for-messages", "§7> §cWait §b{seconds} §cseconds");
+        msgTooLong = messagesConfig.getString("max-message-characters", "§7> §cMaximum characters in message - §b{max}§c!");
+        msgTooManyRepeat = messagesConfig.getString("max-messages-repetition", "§7> §cYou are sending the same message too many times!");
 
         // Provider select
         String providerName = config.getString("provider", "Multipass");
