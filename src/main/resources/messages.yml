@@ -13,6 +13,7 @@ nick-success: "§7> §fYour nickname changed to §b{nick}"
 nick-cleared: "§7> §fYour nickname §ccleared"
 nick-usage: "§7> §cUsage: §e/nick <nick>"
 nick-in-blacklist: "§7> §cThis nickname is banned!"
+nick-characters-limit: "§7> §cNickname must be from §b{min}§c to §b{max} §ccharacters!"
 
 # Realname command messages
 realname-usage: "§7> §cUsage: §e/realname <player>"

@@ -97,6 +97,7 @@ public class EssentialsChat extends PluginBase implements Listener {
     private String msgCooldown;
     private String msgTooLong;
     private String msgTooManyRepeat;
+    private String msgNickMaxLimit;
     private Timer updateTimer;
 
     public static EssentialsChat getInstance() {
@@ -181,6 +182,7 @@ public class EssentialsChat extends PluginBase implements Listener {
         msgNickBlackList = messagesConfig.getString("nick-in-blacklist", "§7> §cThis nickname is banned!");
         msgNickUsed = messagesConfig.getString("nick-used", "§7> §cThis nickname is already in use!");
         msgNickUsage = messagesConfig.getString("nick-usage", "§7> §cUsage: §e/nick <nick>");
+        msgNickMaxLimit = messagesConfig.getString("nick-usage", "§7> §cUsage: §e/nick <nick>");
         msgRealNameUsage = messagesConfig.getString("realname-usage", "§7> §cUsage: §e/realname <player>");
         msgRealNameOutput = messagesConfig.getString("realname-output", "§7> §fReal name of player §b{player}: §3{nick}");
         msgRealNameNotFound = messagesConfig.getString("realname-not-found", "§7> §cPlayer not found!");
@@ -289,6 +291,7 @@ public class EssentialsChat extends PluginBase implements Listener {
                 return true;
             }
             if (input.length() < minNickCharacters || input.length() > maxNickCharacters) {
+                player.sendMessage(msgNickMaxLimit);
                 player.sendMessage("§7> §cNickname must be from §b" + minNickCharacters + "§c to §b" + maxNickCharacters + " §ccharacters!");
                 return true;
             }
@@ -347,8 +350,11 @@ public class EssentialsChat extends PluginBase implements Listener {
         if (chatFilterEnabled) {
             long now = System.currentTimeMillis();
             long lastTime = lastMessageTime.getOrDefault(name, 0L);
-            if ((now - lastTime) < (chatCooldown * 1000L)) {
-                player.sendMessage(msgCooldown.replace("{seconds}", String.valueOf(chatCooldown)));
+            long cooldownMillis = chatCooldown * 1000L;
+            long timeLeftMillis = cooldownMillis - (now - lastTime);
+            if (timeLeftMillis > 0) {
+                double timeLeftSeconds = Math.ceil(timeLeftMillis / 1000.0);
+                player.sendMessage(msgCooldown.replace("{seconds}", String.valueOf(timeLeftSeconds)));
                 event.setCancelled(true);
                 return;
             }
