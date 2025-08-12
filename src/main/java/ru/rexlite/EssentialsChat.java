@@ -33,16 +33,9 @@ import cn.nukkit.event.player.PlayerChatEvent;
 import cn.nukkit.event.player.PlayerJoinEvent;
 import cn.nukkit.plugin.PluginBase;
 import cn.nukkit.utils.Config;
-import ru.rexlite.api.EssentialsChatAPI;
-import ru.rexlite.api.EssentialsChatAPIImpl;
-import ru.rexlite.managers.ChatManager;
-import ru.rexlite.managers.DisplayManager;
-import ru.rexlite.managers.NickManager;
-import ru.rexlite.managers.PrefixManager;
-import ru.rexlite.providers.FallbackProvider;
-import ru.rexlite.providers.LProvider;
-import ru.rexlite.providers.MultipassProvider;
-import ru.rexlite.providers.PrefixSuffixProvider;
+import ru.rexlite.api.*;
+import ru.rexlite.managers.*;
+import ru.rexlite.providers.*;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -218,23 +211,12 @@ public class EssentialsChat extends PluginBase implements Listener {
         msgTooManyRepeat = messagesConfig.getString("max-messages-repetition", "§7> §cYou are sending the same message too many times!");
 
         // Provider select
-        String providerName = config.getString("provider", "Multipass");
+        provider = ProviderSelector.selectProvider(this, config);
+        prefixProviderEnabled = !(provider instanceof FallbackProvider);
         if (prefixProviderEnabled) {
-            if (providerName.equalsIgnoreCase("Multipass") && getServer().getPluginManager().getPlugin("Multipass") != null) {
-                provider = new MultipassProvider();
-            } else if (providerName.equalsIgnoreCase("LuckPerms") && getServer().getPluginManager().getPlugin("LuckPerms") != null) {
-                try {
-                    provider = new LProvider();
-                } catch (NoClassDefFoundError e) {
-                    getLogger().warning("§eLuckPerms classes not found! Falling back to Multipass or Fallback provider.");
-                    provider = getServer().getPluginManager().getPlugin("Multipass") != null ? new MultipassProvider() : new FallbackProvider();
-                }
-            } else {
-                provider = new FallbackProvider();
-                getLogger().warning("§eSpecified provider not found. Using fallback provider.");
-            }
+            getLogger().info("§aPrefix provider auto-selected: §2" + provider.getClass().getSimpleName());
         } else {
-            provider = new FallbackProvider();
+            getLogger().warning("§eNo prefix provider found! Prefix support disabled.");
         }
 
         nickManager = new NickManager(this);

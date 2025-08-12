@@ -2,8 +2,8 @@
 #       GLOBAL SETTINGS         #
 # - - - - - - - - - - - - - - - #
 
-# Providers: LuckPerms, Multipass
-provider: "LuckPerms"
+# Providers: luckperms, multipass, fallback
+provider: "luckperms"
 
 # Color for OP players. For example, b = §b
 op-nickname-color: "4"
