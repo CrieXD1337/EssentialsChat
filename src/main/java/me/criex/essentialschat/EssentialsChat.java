@@ -160,7 +160,8 @@ public class EssentialsChat extends PluginBase implements Listener {
         allowColoredNick = config.getBoolean("allow-colored-nick", false);
         allowDuplicateNicknames = config.getBoolean("allow-duplicate-nicknames", false);
         fakeNicknameCharacter = config.getString("fake-nickname-character", "~");
-        if ("BOLD".equalsIgnoreCase(fakeNicknameCharacter)) fakeNicknameCharacter = "§o";
+        if ("italic".equalsIgnoreCase(fakeNicknameCharacter)) fakeNicknameCharacter = "§o";
+        if ("bold".equalsIgnoreCase(fakeNicknameCharacter)) fakeNicknameCharacter = "§l";
         else fakeNicknameCharacter = fakeNicknameCharacter.replace('&', '§');
         opNicknameColor = config.getString("op-nickname-color", "c");
         if (!opNicknameColor.matches("[0-9a-f]")) {
