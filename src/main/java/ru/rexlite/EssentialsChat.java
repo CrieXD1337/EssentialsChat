@@ -100,6 +100,7 @@ public class EssentialsChat extends PluginBase implements Listener {
     private String msgTooLong;
     private String msgTooManyRepeat;
     private String msgNickMaxLimit;
+    private String msgNickAllowedCharacters;
     private Timer updateTimer;
 
     public static EssentialsChat getInstance() {
@@ -199,7 +200,8 @@ public class EssentialsChat extends PluginBase implements Listener {
         msgNickBlackList = messagesConfig.getString("nick-in-blacklist", "§7> §cThis nickname is banned!");
         msgNickUsed = messagesConfig.getString("nick-used", "§7> §cThis nickname is already in use!");
         msgNickUsage = messagesConfig.getString("nick-usage", "§7> §cUsage: §e/nick <nick>");
-        msgNickMaxLimit = messagesConfig.getString("nick-usage", "§7> §cUsage: §e/nick <nick>");
+        msgNickMaxLimit = messagesConfig.getString("nick-characters-limit", "§7> §cNickname must be from §b{min}§c to §b{max} §ccharacters!");
+        msgNickAllowedCharacters = messagesConfig.getString("nick-allowed-characters", "§cInvalid characters! Allowed: §4{allowed}");
         msgRealNameUsage = messagesConfig.getString("realname-usage", "§7> §cUsage: §e/realname <player>");
         msgRealNameOutput = messagesConfig.getString("realname-output", "§7> §fReal name of player §b{player}: §3{nick}");
         msgRealNameNotFound = messagesConfig.getString("realname-not-found", "§7> §cPlayer not found!");
@@ -308,12 +310,11 @@ public class EssentialsChat extends PluginBase implements Listener {
                 return true;
             }
             if (input.length() < minNickCharacters || input.length() > maxNickCharacters) {
-                player.sendMessage(msgNickMaxLimit);
-                player.sendMessage("§7> §cNickname must be from §b" + minNickCharacters + "§c to §b" + maxNickCharacters + " §ccharacters!");
+                player.sendMessage(msgNickMaxLimit.replace("{min}", String.valueOf(minNickCharacters)).replace("{max}", String.valueOf(maxNickCharacters)));
                 return true;
             }
             if (!input.matches("^[" + allowedCharactersInNickRegex + "]+$")) {
-                player.sendMessage("§cInvalid characters! Allowed: §4" + allowedCharactersInNickRegex);
+                player.sendMessage(msgNickAllowedCharacters.replace("{allowed}", allowedCharactersInNickRegex));
                 return true;
             }
             if (!allowDuplicateNicknames && nickManager.isUsed(input)) {
