@@ -39,31 +39,64 @@ public class NickManager {
     }
 
     public void setPlayerNick(Player player, String nick) {
+        if (plugin.isDebugEnabled()) {
+            plugin.getLogger().info("§b[DEBUG] Setting nick for player: " + player.getName() + ", nick: " + nick);
+        }
         playerNicks.put(player.getName(), nick);
+        if (plugin.isDebugEnabled()) {
+            plugin.getLogger().info("§b[DEBUG] Successfully set nick for player: " + player.getName() + ", nick: " + nick);
+        }
     }
 
     public void clearPlayerNick(Player player) {
+        if (plugin.isDebugEnabled()) {
+            plugin.getLogger().info("§b[DEBUG] Clearing nick for player: " + player.getName());
+        }
         playerNicks.remove(player.getName());
+        if (plugin.isDebugEnabled()) {
+            plugin.getLogger().info("§b[DEBUG] Successfully cleared nick for player: " + player.getName());
+        }
     }
 
     public String getRealName(String fakeNick) {
+        if (plugin.isDebugEnabled()) {
+            plugin.getLogger().info("§b[DEBUG] Looking up real name for nick: " + fakeNick);
+        }
         for (Map.Entry<String, String> entry : playerNicks.entrySet()) {
             if (entry.getValue().equalsIgnoreCase(fakeNick)) {
+                if (plugin.isDebugEnabled()) {
+                    plugin.getLogger().info("§b[DEBUG] Found real name: " + entry.getKey() + " for nick: " + fakeNick);
+                }
                 return entry.getKey();
             }
+        }
+        if (plugin.isDebugEnabled()) {
+            plugin.getLogger().info("§b[DEBUG] No real name found for nick: " + fakeNick);
         }
         return null;
     }
 
     public String getPlayerNick(Player player) {
-        return playerNicks.getOrDefault(player.getName(), null);
+        String nick = playerNicks.getOrDefault(player.getName(), null);
+        // not need this debug now
+        //if (plugin.isDebugEnabled()) {
+        //    plugin.getLogger().info("§b[DEBUG] Retrieved nick for player: " + player.getName() + ", nick: " + (nick != null ? nick : "none"));
+        //}
+        return nick;
     }
 
     public boolean isUsed(String nick) {
-        return playerNicks.containsValue(nick);
+        boolean used = playerNicks.containsValue(nick);
+        if (plugin.isDebugEnabled()) {
+            plugin.getLogger().info("§b[DEBUG] Checking if nick is used: " + nick + ", result: " + used);
+        }
+        return used;
     }
 
     public Map<String, String> getAllNicks() {
+        if (plugin.isDebugEnabled()) {
+            plugin.getLogger().info("§b[DEBUG] Retrieving all nicks: " + playerNicks);
+        }
         return playerNicks;
     }
 }

@@ -38,16 +38,36 @@ public class DisplayManager {
     }
 
     public void updateDisplay(Player player) {
-        if (!plugin.isPrefixInSettingsAndHeadEnabled()) return;
+        if (!plugin.isPrefixInSettingsAndHeadEnabled()) {
+            if (plugin.isDebugEnabled()) {
+                plugin.getLogger().info("§b[DEBUG] Prefix in settings and head is disabled, skipping display update for player: " + player.getName());
+            }
+            return;
+        }
+
+        //if (plugin.isDebugEnabled()) {
+        //    plugin.getLogger().info("§b[DEBUG] Updating display for player: " + player.getName());
+        //}
+
         String prefix = provider.getPrefix(player);
         String suffix = provider.getSuffix(player);
         String nick = plugin.getNickManager().getPlayerNick(player);
         String name = nick != null ? plugin.formatNick(nick) : player.getName();
+
+        if (plugin.isDebugEnabled()) {
+            plugin.getLogger().info("§b[DEBUG] Player: " + player.getName() + ", prefix: " + (prefix != null ? prefix : "none") + ", suffix: " + (suffix != null ? suffix : "none") + ", nick: " + (nick != null ? nick : "none") + ", formatted name: " + name);
+        }
+
         String display = plugin.getPrefixInSettingsAndHeadFormat()
                 .replace("{prefix}", prefix != null ? prefix : "")
                 .replace("{player}", name)
                 .replace("{suffix}", suffix != null ? suffix : "");
         display = plugin.parsePlaceholders(player, display);
+
+        if (plugin.isDebugEnabled()) {
+            plugin.getLogger().info("§b[DEBUG] Set display name and nametag for player: " + player.getName() + ", result: " + display);
+        }
+
         player.setDisplayName(display);
         player.setNameTag(display);
     }

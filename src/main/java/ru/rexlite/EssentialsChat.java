@@ -66,6 +66,8 @@ public class EssentialsChat extends PluginBase implements Listener {
     private List<String> nicknameBlacklist;
     private List<String> prefixBlacklist;
 
+    private boolean debug;
+
     private int localChatRadius;
     private String globalChatSymbol;
     private String localChatFormat;
@@ -143,6 +145,8 @@ public class EssentialsChat extends PluginBase implements Listener {
         // Blacklist reading
         nicknameBlacklist = config.getStringList("nicknames-blacklist").stream().map(String::toLowerCase).collect(Collectors.toList());
         prefixBlacklist = config.getStringList("prefixes-blacklist").stream().map(String::toLowerCase).collect(Collectors.toList());
+
+        debug = config.getBoolean("debug", false);
 
         // Settings
         localChatRadius = config.getInt("local-chat-radius", 100);
@@ -242,7 +246,10 @@ public class EssentialsChat extends PluginBase implements Listener {
         // Event registration
         getServer().getPluginManager().registerEvents(this, this);
         startUpdateTimer();
-        getLogger().info("§aEssentialsChat loaded. Provider: §e" + provider.getClass().getSimpleName());
+        getLogger().info("§aEssentialsChat loaded. Provider: §2" + provider.getClass().getSimpleName());
+        if (debug) {
+            this.getLogger().info("§aLoaded with §2debug mode§a!");
+        }
     }
 
     @Override
@@ -252,9 +259,17 @@ public class EssentialsChat extends PluginBase implements Listener {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+        if (isDebugEnabled()) {
+            this.getLogger().info("§b[DEBUG] Command executed: " + command.getName() + ", sender: " + sender.getName() + ", args: " + Arrays.toString(args));
+        }
+
         if (command.getName().equalsIgnoreCase("prefix")) {
             if (!(sender instanceof Player)) {
                 sender.sendMessage(msgCmdOnlyForPlayers);
+                // other debug - soon?
+                //if (isDebugEnabled()) {
+                //    getLogger().info("§b[DEBUG] Command /prefix failed: sender is not a player");
+                //}
                 return true;
             }
             Player player = (Player) sender;
@@ -463,5 +478,9 @@ public class EssentialsChat extends PluginBase implements Listener {
 
     public NickManager getNickManager() {
         return nickManager;
+    }
+
+    public boolean isDebugEnabled() {
+        return debug;
     }
 }

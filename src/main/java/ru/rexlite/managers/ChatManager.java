@@ -36,14 +36,29 @@ public class ChatManager {
     }
 
     public String formatChatMessage(Player player, String format, String message) {
+        if (EssentialsChat.getInstance().isDebugEnabled()) {
+            EssentialsChat.getInstance().getLogger().info("§b[DEBUG] Formatting chat message for player: " + player.getName() + ", format: " + format + ", message: " + message);
+        }
+
         String prefix = provider.getPrefix(player);
         String suffix = provider.getSuffix(player);
         String nick = EssentialsChat.getInstance().getNickManager().getPlayerNick(player);
         String name = nick != null ? EssentialsChat.getInstance().formatNick(nick) : player.getName();
-        return format
+
+        if (EssentialsChat.getInstance().isDebugEnabled()) {
+            EssentialsChat.getInstance().getLogger().info("§b[DEBUG] Player: " + player.getName() + ", prefix: " + (prefix != null ? prefix : "none") + ", suffix: " + (suffix != null ? suffix : "none") + ", nick: " + (nick != null ? nick : "none") + ", formatted name: " + name);
+        }
+
+        String formattedMessage = format
                 .replace("{prefix}", prefix != null ? prefix : "")
                 .replace("{player}", name)
                 .replace("{suffix}", suffix != null ? suffix : "")
                 .replace("{msg}", message);
+
+        //if (EssentialsChat.getInstance().isDebugEnabled()) {
+        //    EssentialsChat.getInstance().getLogger().info("§b[DEBUG] Formatted chat message for player: " + player.getName() + ", result: " + formattedMessage);
+        //}
+
+        return formattedMessage;
     }
 }

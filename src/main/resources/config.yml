@@ -17,6 +17,9 @@ local-chat-format: "§7[§aL§7] §7[{prefix}§r§7] §f{player}{suffix} §a» �
 global-chat-symbol: "!" # Type ! before your message to write to global chat
 global-chat-format: "§7[§4G§7] §7[{prefix}§r§7] §f{player}{suffix} §a» §f{msg}"
 
+# Do not touch this option :)
+debug: false
+
 # Prefix in settings [ESC] and in display name
 prefix-in-settings-and-head:
   enabled: true
