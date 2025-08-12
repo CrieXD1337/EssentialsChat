@@ -70,3 +70,8 @@ chat-filtering:
   cooldown-for-messages: 3 # seconds
   max-message-characters: 200
   max-messages-repetition: 5
+  # Available methods: Kick, Message, Command
+  repetition-punishment: "Message"
+  # Used only if repetition-punishment is Command
+  # {player} - player's name
+  punishment-command: 'mute 30 minutes "{player}" Too many repeat'

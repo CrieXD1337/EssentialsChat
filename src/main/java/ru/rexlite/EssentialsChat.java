@@ -79,6 +79,8 @@ public class EssentialsChat extends PluginBase implements Listener {
     private int prefixMaxCharacters, prefixMinCharacters;
     private int maxNickCharacters, minNickCharacters;
     private String allowedCharactersRegex, allowedCharactersInNickRegex;
+    private String repetitionPunishment;
+    private String punishmentCommand;
 
     // Chat filtering
     private boolean chatFilterEnabled;
@@ -171,6 +173,21 @@ public class EssentialsChat extends PluginBase implements Listener {
         chatCooldown = config.getInt("chat-filtering.cooldown-for-messages", 3);
         chatMaxChars = config.getInt("chat-filtering.max-message-characters", 200);
         chatMaxRepeat = config.getInt("chat-filtering.max-messages-repetition", 5);
+        repetitionPunishment = config.getString("chat-filtering.repetition-punishment", "Message");
+        punishmentCommand = config.getString("chat-filtering.punishment-command", "");
+
+
+        // Validate repetition-punishment
+        if (!Arrays.asList("kick", "message", "command").contains(repetitionPunishment.toLowerCase())) {
+            getLogger().warning("§eInvalid repetition-punishment value: " + repetitionPunishment + ". Defaulting to 'Message'.");
+            repetitionPunishment = "Message";
+        }
+
+        if (repetitionPunishment.equalsIgnoreCase("command") && punishmentCommand.isEmpty()) {
+            getLogger().warning("§ePunishment command is empty for 'Command' repetition-punishment. Defaulting to 'Message'.");
+            repetitionPunishment = "Message";
+        }
+
 
         // Messages
         msgPrefixSet = messagesConfig.getString("prefix-set", "§7> §fYour prefix successfully moved to: §b{prefix}");
@@ -368,8 +385,24 @@ public class EssentialsChat extends PluginBase implements Listener {
                     ? messageRepetitionCount.getOrDefault(name, 1) + 1
                     : 1;
             if (repeatCount > chatMaxRepeat) {
-                player.sendMessage(msgTooManyRepeat);
                 event.setCancelled(true);
+                switch (repetitionPunishment.toLowerCase()) {
+                    case "kick":
+                        player.kick(msgTooManyRepeat, false);
+                        break;
+                    case "command":
+                        if (!punishmentCommand.isEmpty()) {
+                            String command = punishmentCommand.replace("{player}", player.getName());
+                            getServer().dispatchCommand(getServer().getConsoleSender(), command);
+                        } else {
+                            player.sendMessage(msgTooManyRepeat);
+                        }
+                        break;
+                    case "message":
+                    default:
+                        player.sendMessage(msgTooManyRepeat);
+                        break;
+                }
                 return;
             }
             lastMessageTime.put(name, now);
