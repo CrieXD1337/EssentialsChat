@@ -22,16 +22,11 @@
  *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  *  SOFTWARE.
  */
-package ru.rexlite.api;
+package me.criex.essentialschat.providers;
 
 import cn.nukkit.Player;
 
-public interface EssentialsChatAPI {
-    void setNickname(Player player, String nickname);
-    void clearNickname(Player player);
-    String getRealName(String fakeNick);
-    void setPrefix(Player player, String prefix);
-    void clearPrefix(Player player);
+public interface PrefixSuffixProvider {
     String getPrefix(Player player);
     String getSuffix(Player player);
 }

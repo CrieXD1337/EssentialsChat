@@ -22,14 +22,14 @@
  *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  *  SOFTWARE.
  */
-package ru.rexlite.managers;
+package me.criex.essentialschat.managers;
 
 import cn.nukkit.Player;
 import ru.nukkit.multipass.Multipass;
-import ru.rexlite.EssentialsChat;
-import ru.rexlite.providers.LProvider;
-import ru.rexlite.providers.MultipassProvider;
-import ru.rexlite.providers.PrefixSuffixProvider;
+import me.criex.essentialschat.EssentialsChat;
+import me.criex.essentialschat.providers.LProvider;
+import me.criex.essentialschat.providers.MultipassProvider;
+import me.criex.essentialschat.providers.PrefixSuffixProvider;
 
 public class PrefixManager {
     private final EssentialsChat plugin;

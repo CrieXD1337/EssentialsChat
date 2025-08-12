@@ -22,10 +22,10 @@
  *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  *  SOFTWARE.
  */
-package ru.rexlite.managers;
+package me.criex.essentialschat.managers;
 
 import cn.nukkit.Player;
-import ru.rexlite.EssentialsChat;
+import me.criex.essentialschat.EssentialsChat;
 
 import java.util.HashMap;
 import java.util.Map;

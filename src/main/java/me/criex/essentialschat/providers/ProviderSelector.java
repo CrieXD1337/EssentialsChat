@@ -1,8 +1,8 @@
-package ru.rexlite.providers;
+package me.criex.essentialschat.providers;
 
 import cn.nukkit.plugin.PluginManager;
 import cn.nukkit.utils.Config;
-import ru.rexlite.EssentialsChat;
+import me.criex.essentialschat.EssentialsChat;
 
 public class ProviderSelector {
     public static PrefixSuffixProvider selectProvider(EssentialsChat plugin, Config config) {

@@ -22,13 +22,13 @@
  *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  *  SOFTWARE.
  */
-package ru.rexlite.api;
+package me.criex.essentialschat.api;
 
 import cn.nukkit.Player;
-import ru.rexlite.managers.DisplayManager;
-import ru.rexlite.managers.NickManager;
-import ru.rexlite.managers.PrefixManager;
-import ru.rexlite.providers.PrefixSuffixProvider;
+import me.criex.essentialschat.managers.DisplayManager;
+import me.criex.essentialschat.managers.NickManager;
+import me.criex.essentialschat.managers.PrefixManager;
+import me.criex.essentialschat.providers.PrefixSuffixProvider;
 
 public class EssentialsChatAPIImpl implements EssentialsChatAPI {
     private final NickManager nickManager;

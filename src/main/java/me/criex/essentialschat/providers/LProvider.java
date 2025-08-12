@@ -22,18 +22,38 @@
  *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  *  SOFTWARE.
  */
-package ru.rexlite.providers;
+package me.criex.essentialschat.providers;
 
 import cn.nukkit.Player;
+import net.luckperms.api.LuckPerms;
+import net.luckperms.api.LuckPermsProvider;
+import net.luckperms.api.model.user.User;
 
-public class FallbackProvider implements PrefixSuffixProvider {
+public class LProvider implements PrefixSuffixProvider {
+
+    private final LuckPerms luckPerms;
+
+    public LProvider() {
+        this.luckPerms = LuckPermsProvider.get();
+    }
+
     @Override
     public String getPrefix(Player player) {
-        return "";
+        User user = luckPerms.getUserManager().getUser(player.getUniqueId());
+        return user != null && user.getCachedData().getMetaData().getPrefix() != null
+                ? user.getCachedData().getMetaData().getPrefix()
+                : "";
     }
 
     @Override
     public String getSuffix(Player player) {
-        return "";
+        User user = luckPerms.getUserManager().getUser(player.getUniqueId());
+        return user != null && user.getCachedData().getMetaData().getSuffix() != null
+                ? user.getCachedData().getMetaData().getSuffix()
+                : "";
+    }
+
+    public LuckPerms getLuckPerms() {
+        return luckPerms;
     }
 }

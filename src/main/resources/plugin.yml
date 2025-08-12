@@ -1,6 +1,6 @@
 name: EssentialsChat
 version: ${pom.version}
-main: ru.rexlite.EssentialsChat
+main: me.criex.essentialschat.EssentialsChat
 api: ["1.1.0", "1.0.14"]
 depend:
   - "PlaceholderAPI"
