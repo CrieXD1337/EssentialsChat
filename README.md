@@ -37,8 +37,8 @@
 1. **Download the Plugin**:
   - Grab the [latest](https://github.com/CrieXD1337/EssentialsChat/releases/latest) `.jar` file from [Releases](https://github.com/CrieXD1337/EssentialsChat/releases/latest) 📦
 2. **Install Dependencies**:
-  - **Required**: [PlaceholderAPI](https://github.com/NukkitX/PlaceholderAPI) for placeholder support.
-  - **Optional**: [LuckPerms](https://github.com/LuckPerms/LuckPerms) or [Multipass](https://github.com/NukkitX/Multipass) for prefix/suffix support.
+  - **Required**: [PlaceholderAPI](https://cloudburstmc.org/resources/placeholderapi.104/) for placeholder support.
+  - **Optional**: [LuckPerms](https://luckperms.net/download) or [Multipass](https://cloudburstmc.org/resources/multipass.29/) for prefix/suffix support.
 3. **Place the Jar**:
   - Drop `EssentialsChat.jar` into your `plugins` folder.
 4. **Restart the Server**:
