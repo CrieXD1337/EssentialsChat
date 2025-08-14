@@ -2,27 +2,48 @@
 #       GLOBAL SETTINGS         #
 # - - - - - - - - - - - - - - - #
 
-# Providers: luckperms, multipass, fallback
-provider: "luckperms"
-
 # Color for OP players. For example, b = §b
 op-nickname-color: "4"
 
-# Local chat settings
-# If you use ClanSystemMX plugin - you can use placeholder %clantag% to display clan tag.
-local-chat-radius: 100 # blocks
-local-chat-format: "§7[§aL§7] §7[{prefix}§r§7] §f{player}{suffix} §a» §8{msg}"
+# Chat formatting settings
+chat-formatting:
 
-# Global chat settings
-global-chat-symbol: "!" # Type ! before your message to write to global chat
-global-chat-format: "§7[§4G§7] §7[{prefix}§r§7] §f{player}{suffix} §a» §f{msg}"
+  # Available methods:
+  # 1 - default, local/global
+  # 2 - single format (local or global, with placeholders)
+  # 3 - default Minecraft format (with placeholders)
+  format-method: 1
+
+  # local or global, used in format-method 2
+  single-chat-type: "global"
+
+  # blocks, used in format-method 1
+  local-chat-radius: 100 # blocks, used in format-method 1
+
+  # Local chat settings
+  # Used in format-method 1 or 2 (if single-chat-type is local)
+  # If you use ClanSystem plugin - you can use placeholder %clantag% to display clan tag.
+  local-chat-format: "§7[§aL§7] §r{prefix}§r {player}{suffix}§r §a» §8{msg}" # used in format-method 1 or 2
+
+  # Global chat settings
+  # Used in format-method 1 or 2 (if single-chat-type is global)
+  # Enter this symbol before a message to write a message to the global chat.
+  global-chat-symbol: "!"
+
+  # Formatting
+  # Used in format-method 1 or 2 (if single-chat-type is global)
+  global-chat-format: "§7[§4G§7] §r{prefix}§r {player}{suffix}§r §a» §f{msg}"
+
+  # Default minecraft format
+  # used in format-method 3
+  default-chat-format: "§r<{prefix}§r{player}{suffix}§r> §f{msg}"
 
 # Do not touch this option :)
 debug: false
 
 # Prefix in settings [ESC] and in display name
 prefix-in-settings-and-head:
-  enabled: true
+  enabled: false
   format: "[{prefix}] {player}{suffix}"
 
 # - - - - - - - - - - - - - - - #

@@ -67,6 +67,10 @@ public class EssentialsChat extends PluginBase implements Listener {
     private String globalChatSymbol;
     private String localChatFormat;
     private String globalChatFormat;
+    private String defaultChatFormat;
+    private String singleChatFormat;
+    private String singleChatType;
+    private int formatMethod;
     private String opNicknameColor;
     private boolean allowColoredNick;
     private String fakeNicknameCharacter;
@@ -143,23 +147,30 @@ public class EssentialsChat extends PluginBase implements Listener {
 
         debug = config.getBoolean("debug", false);
 
-        // Settings
-        localChatRadius = config.getInt("local-chat-radius", 100);
-        globalChatSymbol = config.getString("global-chat-symbol", "!");
-        localChatFormat = config.getString("local-chat-format");
-        globalChatFormat = config.getString("global-chat-format");
+        // Chat format
+        formatMethod = config.getInt("chat-formatting.format-method", 1);
+        localChatRadius = config.getInt("chat-formatting.local-chat-radius", 100);
+        globalChatSymbol = config.getString("chat-formatting.global-chat-symbol", "!");
+        localChatFormat = config.getString("chat-formatting.local-chat-format", "§7[§aL§7] §r{prefix}§r {player}{suffix}§r §a» §8{msg}");
+        globalChatFormat = config.getString("chat-formatting.global-chat-format", "§7[§4G§7] §r{prefix}§r {player}{suffix}§r §a» §f{msg}");
+        singleChatType = config.getString("chat-formatting.single-chat-type", "global"); // local or global
+        singleChatFormat = singleChatType.equalsIgnoreCase("local") ? localChatFormat : globalChatFormat;
+        defaultChatFormat = config.getString("chat-formatting.default-chat-format", "§r<{prefix}§r{player}{suffix}§r> §f{msg}");
+
+        // prefix
         prefixInSettingsAndHeadEnabled = config.getBoolean("prefix-in-settings-and-head.enabled", false);
         prefixInSettingsAndHeadFormat = config.getString("prefix-in-settings-and-head.format");
-
         prefixMaxCharacters = config.getInt("prefix-max-characters", 15);
         prefixMinCharacters = config.getInt("prefix-min-characters", 3);
         allowedCharactersRegex = config.getString("allowed-characters", "A-Za-z0-9_-");
+
+        // nick
         maxNickCharacters = config.getInt("max-nick-characters-length", 15);
         minNickCharacters = config.getInt("min-nick-characters-length", 3);
         allowedCharactersInNickRegex = config.getString("allowed-characters-in-nick", "A-Za-z0-9_-");
         allowColoredNick = config.getBoolean("allow-colored-nick", false);
         allowDuplicateNicknames = config.getBoolean("allow-duplicate-nicknames", false);
-        fakeNicknameCharacter = config.getString("fake-nickname-character", "~");
+        fakeNicknameCharacter = config.getString("fake-nickname-character", "italic");
         if ("italic".equalsIgnoreCase(fakeNicknameCharacter)) fakeNicknameCharacter = "§o";
         if ("bold".equalsIgnoreCase(fakeNicknameCharacter)) fakeNicknameCharacter = "§l";
         else fakeNicknameCharacter = fakeNicknameCharacter.replace('&', '§');
@@ -214,7 +225,7 @@ public class EssentialsChat extends PluginBase implements Listener {
         msgTooManyRepeat = messagesConfig.getString("max-messages-repetition", "§7> §cYou are sending the same message too many times!");
 
         // Provider select
-        provider = ProviderSelector.selectProvider(this, config);
+        provider = ProviderSelector.selectProvider(this);
         prefixProviderEnabled = !(provider instanceof FallbackProvider);
         if (prefixProviderEnabled) {
             getLogger().info("§aPrefix provider auto-selected: §2" + provider.getClass().getSimpleName());
@@ -410,18 +421,29 @@ public class EssentialsChat extends PluginBase implements Listener {
             lastPlayerMessage.put(name, message);
             messageRepetitionCount.put(name, repeatCount);
         }
-        String formatted;
 
-        if (message.startsWith(globalChatSymbol)) {
-            formatted = chatManager.formatChatMessage(player,
-                    globalChatFormat,
-                    message.substring(globalChatSymbol.length()).trim());
-        } else {
-            formatted = chatManager.formatChatMessage(player,
-                    localChatFormat,
-                    message);
-            event.getRecipients().removeIf(p -> p instanceof Player &&
-                    ((Player) p).distance(player) > localChatRadius);
+        String formatted;
+        switch (formatMethod) {
+            case 2: // Single format
+                formatted = chatManager.formatChatMessage(player, singleChatFormat, message);
+                if (singleChatType.equalsIgnoreCase("local")) {
+                    event.getRecipients().removeIf(p -> p instanceof Player &&
+                            ((Player) p).distance(player) > localChatRadius);
+                }
+                break;
+            case 3: // Default Minecraft format
+                formatted = chatManager.formatChatMessage(player, defaultChatFormat, message);
+                break;
+            case 1: // L/G chat
+            default:
+                if (message.startsWith(globalChatSymbol)) {
+                    formatted = chatManager.formatChatMessage(player, globalChatFormat, message.substring(globalChatSymbol.length()).trim());
+                } else {
+                    formatted = chatManager.formatChatMessage(player, localChatFormat, message);
+                    event.getRecipients().removeIf(p -> p instanceof Player &&
+                            ((Player) p).distance(player) > localChatRadius);
+                }
+                break;
         }
         formatted = parsePlaceholders(player, formatted);
         event.setFormat(formatted);

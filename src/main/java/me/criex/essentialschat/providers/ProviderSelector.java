@@ -28,12 +28,16 @@ import cn.nukkit.plugin.PluginManager;
 import cn.nukkit.utils.Config;
 import me.criex.essentialschat.EssentialsChat;
 
+import java.io.File;
+
 public class ProviderSelector {
-    public static PrefixSuffixProvider selectProvider(EssentialsChat plugin, Config config) {
+    public static PrefixSuffixProvider selectProvider(EssentialsChat plugin) {
         PluginManager pluginManager = plugin.getServer().getPluginManager();
+        File providerFile = new File(plugin.getDataFolder(), "provider.yml");
+        Config providerConfig = new Config(providerFile, Config.YAML);
         boolean hasLuckPerms = pluginManager.getPlugin("LuckPerms") != null;
         boolean hasMultipass = pluginManager.getPlugin("Multipass") != null;
-        String configProvider = config.getString("provider", "luckperms").toLowerCase();
+        String configProvider = providerConfig.getString("provider", "luckperms").toLowerCase();
 
         if (plugin.isDebugEnabled()) {
             plugin.getLogger().info("§b[DEBUG] Selecting provider: LuckPerms=" + hasLuckPerms + ", Multipass=" + hasMultipass + ", ConfigProvider=" + configProvider);
@@ -42,28 +46,28 @@ public class ProviderSelector {
         // Only one plugin available
         if (hasLuckPerms && !hasMultipass) {
             if (!configProvider.equals("luckperms")) {
-                config.set("provider", "luckperms");
-                config.save();
+                providerConfig.set("provider", "luckperms");
+                providerConfig.save();
                 if (plugin.isDebugEnabled()) {
-                    plugin.getLogger().info("§b[DEBUG] Auto-set provider to LuckPerms in config");
+                    plugin.getLogger().info("§b[DEBUG] Auto-set provider to LuckPerms in provider.yml");
                 }
             }
             return new LProvider();
         } else if (hasMultipass && !hasLuckPerms) {
             if (!configProvider.equals("multipass")) {
-                config.set("provider", "multipass");
-                config.save();
+                providerConfig.set("provider", "multipass");
+                providerConfig.save();
                 if (plugin.isDebugEnabled()) {
-                    plugin.getLogger().info("§b[DEBUG] Auto-set provider to Multipass in config");
+                    plugin.getLogger().info("§b[DEBUG] Auto-set provider to Multipass in provider.yml");
                 }
             }
             return new MultipassProvider();
         } else if (!hasLuckPerms && !hasMultipass) {
             if (!configProvider.equals("fallback")) {
-                config.set("provider", "fallback");
-                config.save();
+                providerConfig.set("provider", "fallback");
+                providerConfig.save();
                 if (plugin.isDebugEnabled()) {
-                    plugin.getLogger().info("§b[DEBUG] Auto-set provider to Fallback in config");
+                    plugin.getLogger().info("§b[DEBUG] Auto-set provider to Fallback in provider.yml");
                 }
             }
             return new FallbackProvider();
