@@ -44,6 +44,9 @@ public class ChatManager {
         String suffix = provider.getSuffix(player);
         String nick = EssentialsChat.getInstance().getNickManager().getPlayerNick(player);
         String name = nick != null ? EssentialsChat.getInstance().formatNick(nick) : player.getName();
+        if (player.isOp() && (nick == null || !nick.contains("§"))) {
+            name = "§" + EssentialsChat.getInstance().getConfig().getString("op-nickname-color", "4") + name + "§r";
+        }
 
         if (EssentialsChat.getInstance().isDebugEnabled()) {
             EssentialsChat.getInstance().getLogger().info("§b[DEBUG] Player: " + player.getName() + ", prefix: " + (prefix != null ? prefix : "none") + ", suffix: " + (suffix != null ? suffix : "none") + ", nick: " + (nick != null ? nick : "none") + ", formatted name: " + name);
