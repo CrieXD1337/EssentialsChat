@@ -142,8 +142,8 @@ public class EssentialsChat extends PluginBase implements Listener {
         }
 
         // Blacklist reading
-        nicknameBlacklist = config.getStringList("nicknames-blacklist").stream().map(String::toLowerCase).collect(Collectors.toList());
-        prefixBlacklist = config.getStringList("prefixes-blacklist").stream().map(String::toLowerCase).collect(Collectors.toList());
+        nicknameBlacklist = config.getStringList("nick.nicknames-blacklist").stream().map(String::toLowerCase).collect(Collectors.toList());
+        prefixBlacklist = config.getStringList("prefix.prefixes-blacklist").stream().map(String::toLowerCase).collect(Collectors.toList());
 
         debug = config.getBoolean("debug", false);
 
@@ -158,23 +158,23 @@ public class EssentialsChat extends PluginBase implements Listener {
         defaultChatFormat = config.getString("chat-formatting.default-chat-format", "§r<{prefix}§r{player}{suffix}§r> §f{msg}");
 
         // prefix
-        prefixInSettingsAndHeadEnabled = config.getBoolean("prefix-in-settings-and-head.enabled", false);
-        prefixInSettingsAndHeadFormat = config.getString("prefix-in-settings-and-head.format");
-        prefixMaxCharacters = config.getInt("prefix-max-characters", 15);
-        prefixMinCharacters = config.getInt("prefix-min-characters", 3);
-        allowedCharactersRegex = config.getString("allowed-characters", "A-Za-z0-9_-");
+        prefixInSettingsAndHeadEnabled = config.getBoolean("prefix.prefix-in-settings-and-head.enabled", false);
+        prefixInSettingsAndHeadFormat = config.getString("prefix.prefix-in-settings-and-head.format");
+        prefixMaxCharacters = config.getInt("prefix.max-characters-in-prefix", 15);
+        prefixMinCharacters = config.getInt("prefix.min-characters-in-prefix", 3);
+        allowedCharactersRegex = config.getString("prefix.allowed-characters", "A-Za-z0-9_-");
 
         // nick
-        maxNickCharacters = config.getInt("max-nick-characters-length", 15);
-        minNickCharacters = config.getInt("min-nick-characters-length", 3);
-        allowedCharactersInNickRegex = config.getString("allowed-characters-in-nick", "A-Za-z0-9_-");
-        allowColoredNick = config.getBoolean("allow-colored-nick", false);
-        allowDuplicateNicknames = config.getBoolean("allow-duplicate-nicknames", false);
-        fakeNicknameCharacter = config.getString("fake-nickname-character", "italic");
+        maxNickCharacters = config.getInt("nick.max-characters-length", 15);
+        minNickCharacters = config.getInt("nick.min-characters-length", 3);
+        allowedCharactersInNickRegex = config.getString("nick.allowed-characters-in-nick", "A-Za-z0-9_-");
+        allowColoredNick = config.getBoolean("nick.allow-colored-nick", false);
+        allowDuplicateNicknames = config.getBoolean("nick.allow-duplicate-nicknames", false);
+        fakeNicknameCharacter = config.getString("nick.fake-nickname-character", "italic");
         if ("italic".equalsIgnoreCase(fakeNicknameCharacter)) fakeNicknameCharacter = "§o";
         if ("bold".equalsIgnoreCase(fakeNicknameCharacter)) fakeNicknameCharacter = "§l";
         else fakeNicknameCharacter = fakeNicknameCharacter.replace('&', '§');
-        opNicknameColor = config.getString("op-nickname-color", "c");
+        opNicknameColor = config.getString("nick.op-nickname-color", "c");
         if (!opNicknameColor.matches("[0-9a-f]")) {
             getLogger().warning("Invalid OP color. Default set: 4");
             opNicknameColor = "4";

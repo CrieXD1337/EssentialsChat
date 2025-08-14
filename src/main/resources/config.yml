@@ -50,47 +50,62 @@ prefix-in-settings-and-head:
 #       /prefix command         #
 # - - - - - - - - - - - - - - - #
 
-# maximum prefix charters in prefix
-prefix-max-characters: 15
+prefix:
+  # maximum prefix charters in prefix
+  max-characters-in-prefix: 15
 
-# minimum charters in prefix
-prefix-min-characters: 3
+  # minimum charters in prefix
+  min-characters-in-prefix: 3
 
-# Enabled charters in prefix
-allowed-characters: "A-Za-z0-9_-"
+  # Enabled charters in prefix
+  allowed-characters: "A-Za-z0-9_-"
 
-# Banned prefixes
-prefixes-blacklist:
-  - admin
-  - creator
-  - owner
-  - moderator
-  - administrator
+  # Banned prefixes
+  prefixes-blacklist:
+    - admin
+    - creator
+    - owner
+    - moderator
+    - administrator
 
 # - - - - - - - - - - - - - - - #
 #        /nick command          #
 # - - - - - - - - - - - - - - - #
 
-max-nick-characters-length: 15 # Maximum characters allowed in a nickname
-min-nick-characters-length: 3 # Minimum characters required in a nickname
-allowed-characters-in-nick: "A-Za-z0-9_-" # Allowed characters in nicknames
-allow-colored-nick: false # Allow using color codes in nicknames (e.g., &b)
-fake-nickname-character: "italic" # You also can use 'italic' or 'bold'
-allow-duplicate-nicknames: false # Allow a player to set fake nicknames that are already used by another player
-# Banned nicknames
-nicknames-blacklist:
-  - admin
-  - creator
-  - owner
-  - moderator
-  - administrator
+nick:
+  # Maximum characters allowed in a nickname
+  max-characters-length: 15
+
+  # Minimum characters required in a nickname
+  min-characters-length: 3
+
+  # Allowed characters in nicknames
+  allowed-characters-in-nick: "A-Za-z0-9_-"
+
+  # Allow using color codes in nicknames (e.g., §b)
+  allow-colored-nick: false
+
+  # Character before fake nickname
+  # You also can use 'italic', 'bold' and all characters
+  fake-nickname-character: "italic"
+
+  # Allow a player to set fake nicknames that are already used by another player
+  allow-duplicate-nicknames: false
+
+  # Banned nicknames
+  nicknames-blacklist:
+    - admin
+    - creator
+    - owner
+    - moderator
+    - administrator
 
 # - - - - - - - - - - - - - - - #
 #        CHAT FILTERING         #
 # - - - - - - - - - - - - - - - #
 
 chat-filtering:
-  enabled: true
+  enabled: truel
   cooldown-for-messages: 3 # seconds
   max-message-characters: 200
   max-messages-repetition: 5
