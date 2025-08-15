@@ -27,19 +27,22 @@ package me.criex.essentialschat.managers;
 import cn.nukkit.Player;
 import me.criex.essentialschat.EssentialsChat;
 import me.criex.essentialschat.providers.PrefixSuffixProvider;
+import me.criex.essentialschat.utils.ConfigUtils;
 
 public class DisplayManager {
     private final EssentialsChat plugin;
     private final PrefixSuffixProvider provider;
+    private final ConfigUtils configUtils;
 
-    public DisplayManager(EssentialsChat plugin, PrefixSuffixProvider provider) {
+    public DisplayManager(EssentialsChat plugin, PrefixSuffixProvider provider, ConfigUtils configUtils) {
         this.plugin = plugin;
         this.provider = provider;
+        this.configUtils = configUtils;
     }
 
     public void updateDisplay(Player player) {
-        if (!plugin.isPrefixInSettingsAndHeadEnabled()) {
-            if (plugin.isDebugEnabled()) {
+        if (!configUtils.prefixInSettingsAndHeadEnabled) {
+            if (configUtils.debug) {
                 plugin.getLogger().info("§b[DEBUG] Prefix in settings and head is disabled, skipping display update for player: " + player.getName());
             }
             return;
@@ -54,17 +57,17 @@ public class DisplayManager {
         String nick = plugin.getNickManager().getPlayerNick(player);
         String name = nick != null ? plugin.formatNick(nick) : player.getName();
 
-        if (plugin.isDebugEnabled()) {
+        if (configUtils.debug) {
             plugin.getLogger().info("§b[DEBUG] Player: " + player.getName() + ", prefix: " + (prefix != null ? prefix : "none") + ", suffix: " + (suffix != null ? suffix : "none") + ", nick: " + (nick != null ? nick : "none") + ", formatted name: " + name);
         }
 
-        String display = plugin.getPrefixInSettingsAndHeadFormat()
+        String display = configUtils.prefixInSettingsAndHeadFormat
                 .replace("{prefix}", prefix != null ? prefix : "")
                 .replace("{player}", name)
                 .replace("{suffix}", suffix != null ? suffix : "");
         display = plugin.parsePlaceholders(player, display);
 
-        if (plugin.isDebugEnabled()) {
+        if (configUtils.debug) {
             plugin.getLogger().info("§b[DEBUG] Set display name and nametag for player: " + player.getName() + ", result: " + display);
         }
 

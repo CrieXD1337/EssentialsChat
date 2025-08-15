@@ -32,15 +32,14 @@ import cn.nukkit.event.Listener;
 import cn.nukkit.event.player.PlayerChatEvent;
 import cn.nukkit.event.player.PlayerJoinEvent;
 import cn.nukkit.plugin.PluginBase;
-import cn.nukkit.utils.Config;
 import me.criex.essentialschat.api.*;
 import me.criex.essentialschat.managers.*;
 import me.criex.essentialschat.providers.FallbackProvider;
 import me.criex.essentialschat.providers.PrefixSuffixProvider;
 import me.criex.essentialschat.providers.ProviderSelector;
+import me.criex.essentialschat.utils.ConfigUtils;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class EssentialsChat extends PluginBase implements Listener {
 
@@ -57,51 +56,14 @@ public class EssentialsChat extends PluginBase implements Listener {
     private DisplayManager displayManager;
     private ChatManager chatManager;
 
-    // Settings
-    private List<String> nicknameBlacklist;
-    private List<String> prefixBlacklist;
-
-    private boolean debug;
-
-    private int localChatRadius;
-    private String globalChatSymbol;
-    private String localChatFormat;
-    private String globalChatFormat;
-    private String defaultChatFormat;
-    private String singleChatFormat;
-    private String singleChatType;
-    private int formatMethod;
-    private String opNicknameColor;
-    private boolean allowColoredNick;
-    private String fakeNicknameCharacter;
-    private boolean allowDuplicateNicknames;
-    private boolean prefixInSettingsAndHeadEnabled;
-    private String prefixInSettingsAndHeadFormat;
-    private int prefixMaxCharacters, prefixMinCharacters;
-    private int maxNickCharacters, minNickCharacters;
-    private String allowedCharactersRegex, allowedCharactersInNickRegex;
-    private String repetitionPunishment;
-    private String punishmentCommand;
+    // Config
+    private ConfigUtils configUtils;
 
     // Chat filtering
-    private boolean chatFilterEnabled;
-    private int chatCooldown;
-    private int chatMaxChars;
-    private int chatMaxRepeat;
     private final Map<String, Long> lastMessageTime = new HashMap<>();
     private final Map<String, String> lastPlayerMessage = new HashMap<>();
     private final Map<String, Integer> messageRepetitionCount = new HashMap<>();
 
-    // Messages
-    private String msgPrefixSet, msgPrefixCleared, msgInvalidProvider, msgPrefixBlackList;
-    private String msgNickSuccess, msgNickCleared, msgNickBlackList, msgNickUsed;
-    private String msgNickUsage, msgRealNameUsage, msgRealNameOutput, msgRealNameNotFound;
-    private String msgPrefixLengthError, msgPrefixInvalidChars, msgCmdOnlyForPlayers, msgPrefixUsage;
-    private String msgCooldown;
-    private String msgTooLong;
-    private String msgTooManyRepeat;
-    private String msgNickMaxLimit;
-    private String msgNickAllowedCharacters;
     private Timer updateTimer;
 
     public static EssentialsChat getInstance() {
@@ -116,11 +78,8 @@ public class EssentialsChat extends PluginBase implements Listener {
     public void onEnable() {
         instance = this;
 
-        saveDefaultConfig();
-        saveResource("messages.yml");
-        Config messagesConfig = new Config(getDataFolder() + "/messages.yml", Config.YAML);
-        reloadConfig();
-        Config config = getConfig();
+        // Initialize config
+        configUtils = new ConfigUtils(this);
 
         // Check for prefix providers
         if (getServer().getPluginManager().getPlugin("LuckPerms") != null) {
@@ -141,110 +100,31 @@ public class EssentialsChat extends PluginBase implements Listener {
             getLogger().warning("§ePlaceholderAPI not found. Support disabled.");
         }
 
-        // Blacklist reading
-        nicknameBlacklist = config.getStringList("nick.nicknames-blacklist").stream().map(String::toLowerCase).collect(Collectors.toList());
-        prefixBlacklist = config.getStringList("prefix.prefixes-blacklist").stream().map(String::toLowerCase).collect(Collectors.toList());
-
-        debug = config.getBoolean("debug", false);
-
-        // Chat format
-        formatMethod = config.getInt("chat-formatting.format-method", 1);
-        localChatRadius = config.getInt("chat-formatting.local-chat-radius", 100);
-        globalChatSymbol = config.getString("chat-formatting.global-chat-symbol", "!");
-        localChatFormat = config.getString("chat-formatting.local-chat-format", "§7[§aL§7] §r{prefix}§r {player}{suffix}§r §a» §8{msg}");
-        globalChatFormat = config.getString("chat-formatting.global-chat-format", "§7[§4G§7] §r{prefix}§r {player}{suffix}§r §a» §f{msg}");
-        singleChatType = config.getString("chat-formatting.single-chat-type", "global"); // local or global
-        singleChatFormat = singleChatType.equalsIgnoreCase("local") ? localChatFormat : globalChatFormat;
-        defaultChatFormat = config.getString("chat-formatting.default-chat-format", "§r<{prefix}§r{player}{suffix}§r> §f{msg}");
-
-        // prefix
-        prefixInSettingsAndHeadEnabled = config.getBoolean("prefix.prefix-in-settings-and-head.enabled", false);
-        prefixInSettingsAndHeadFormat = config.getString("prefix.prefix-in-settings-and-head.format");
-        prefixMaxCharacters = config.getInt("prefix.max-characters-in-prefix", 15);
-        prefixMinCharacters = config.getInt("prefix.min-characters-in-prefix", 3);
-        allowedCharactersRegex = config.getString("prefix.allowed-characters", "A-Za-z0-9_-");
-
-        // nick
-        maxNickCharacters = config.getInt("nick.max-characters-length", 15);
-        minNickCharacters = config.getInt("nick.min-characters-length", 3);
-        allowedCharactersInNickRegex = config.getString("nick.allowed-characters-in-nick", "A-Za-z0-9_-");
-        allowColoredNick = config.getBoolean("nick.allow-colored-nick", false);
-        allowDuplicateNicknames = config.getBoolean("nick.allow-duplicate-nicknames", false);
-        fakeNicknameCharacter = config.getString("nick.fake-nickname-character", "italic");
-        if ("italic".equalsIgnoreCase(fakeNicknameCharacter)) fakeNicknameCharacter = "§o";
-        if ("bold".equalsIgnoreCase(fakeNicknameCharacter)) fakeNicknameCharacter = "§l";
-        else fakeNicknameCharacter = fakeNicknameCharacter.replace('&', '§');
-        opNicknameColor = config.getString("nick.op-nickname-color", "c");
-        if (!opNicknameColor.matches("[0-9a-f]")) {
-            getLogger().warning("Invalid OP color. Default set: 4");
-            opNicknameColor = "4";
-        }
-
-        // Chat filtering
-        chatFilterEnabled = config.getBoolean("chat-filtering.enabled", true);
-        chatCooldown = config.getInt("chat-filtering.cooldown-for-messages", 3);
-        chatMaxChars = config.getInt("chat-filtering.max-message-characters", 200);
-        chatMaxRepeat = config.getInt("chat-filtering.max-messages-repetition", 5);
-        repetitionPunishment = config.getString("chat-filtering.repetition-punishment", "Message");
-        punishmentCommand = config.getString("chat-filtering.punishment-command", "");
-
-
-        // Validate repetition-punishment
-        if (!Arrays.asList("kick", "message", "command").contains(repetitionPunishment.toLowerCase())) {
-            getLogger().warning("§eInvalid repetition-punishment value: " + repetitionPunishment + ". Defaulting to 'Message'.");
-            repetitionPunishment = "Message";
-        }
-
-        if (repetitionPunishment.equalsIgnoreCase("command") && punishmentCommand.isEmpty()) {
-            getLogger().warning("§ePunishment command is empty for 'Command' repetition-punishment. Defaulting to 'Message'.");
-            repetitionPunishment = "Message";
-        }
-
-
-        // Messages
-        msgPrefixSet = messagesConfig.getString("prefix-set", "§7> §fYour prefix successfully moved to: §b{prefix}");
-        msgPrefixCleared = messagesConfig.getString("prefix-cleared", "§7> §fYour prefix was §ccleared");
-        msgInvalidProvider = messagesConfig.getString("invalid-provider", "§7> §cProvider §4{provider} §cis currently not available for prefixes. Use §4LuckPerms.");
-        msgPrefixBlackList = messagesConfig.getString("prefix-in-blacklist", "§7> §cThis prefix is banned!");
-        msgNickSuccess = messagesConfig.getString("nick-success", "§7> §fYour nickname changed to §b{nick}");
-        msgNickCleared = messagesConfig.getString("nick-cleared", "§7> §fYour nickname §ccleared");
-        msgNickBlackList = messagesConfig.getString("nick-in-blacklist", "§7> §cThis nickname is banned!");
-        msgNickUsed = messagesConfig.getString("nick-used", "§7> §cThis nickname is already in use!");
-        msgNickUsage = messagesConfig.getString("nick-usage", "§7> §cUsage: §e/nick <nick>");
-        msgNickMaxLimit = messagesConfig.getString("nick-characters-limit", "§7> §cNickname must be from §b{min}§c to §b{max} §ccharacters!");
-        msgNickAllowedCharacters = messagesConfig.getString("nick-allowed-characters", "§cInvalid characters! Allowed: §4{allowed}");
-        msgRealNameUsage = messagesConfig.getString("realname-usage", "§7> §cUsage: §e/realname <player>");
-        msgRealNameOutput = messagesConfig.getString("realname-output", "§7> §fReal name of player §b{player}: §3{nick}");
-        msgRealNameNotFound = messagesConfig.getString("realname-not-found", "§7> §cPlayer not found!");
-        msgPrefixLengthError = messagesConfig.getString("prefix-length-error", "§7> §cThe prefix must be between §4{min}§c and §4{max}§c characters.");
-        msgPrefixInvalidChars = messagesConfig.getString("prefix-invalid-characters", "§cPrefix contains invalid characters! Only allowed: §4{allowed}");
-        msgCmdOnlyForPlayers = messagesConfig.getString("command-only-for-players", "§cAllowed only for players!");
-        msgPrefixUsage = messagesConfig.getString("invalid-usage", "§7> §cUsage: §e/prefix <prefix|off>");
-        msgCooldown = messagesConfig.getString("cooldown-for-messages", "§7> §cWait §b{seconds} §cseconds");
-        msgTooLong = messagesConfig.getString("max-message-characters", "§7> §cMaximum characters in message - §b{max}§c!");
-        msgTooManyRepeat = messagesConfig.getString("max-messages-repetition", "§7> §cYou are sending the same message too many times!");
-
         // Provider select
         provider = ProviderSelector.selectProvider(this);
         prefixProviderEnabled = !(provider instanceof FallbackProvider);
         if (prefixProviderEnabled) {
-            getLogger().info("§aPrefix provider auto-selected: §2" + provider.getClass().getSimpleName());
+            if (configUtils.debug) {
+                getLogger().info("§aPrefix provider auto-selected: §2" + provider.getClass().getSimpleName());
+            }
         } else {
             getLogger().warning("§eNo prefix provider found! Prefix support disabled.");
         }
 
-        nickManager = new NickManager(this);
-        prefixManager = new PrefixManager(this, provider);
-        displayManager = new DisplayManager(this, provider);
-        chatManager = new ChatManager(provider);
-        api = new EssentialsChatAPIImpl(nickManager, prefixManager, provider, displayManager);
+        nickManager = new NickManager(this, configUtils);
+        prefixManager = new PrefixManager(this, provider, configUtils);
+        displayManager = new DisplayManager(this, provider, configUtils);
+        chatManager = new ChatManager(provider, configUtils);
+        api = new EssentialsChatAPIImpl(nickManager, prefixManager, provider, displayManager, configUtils);
 
         // Event registration
         getServer().getPluginManager().registerEvents(this, this);
         startUpdateTimer();
-        getLogger().info("§aEssentialsChat loaded. Provider: §2" + provider.getClass().getSimpleName());
-        if (debug) {
-            this.getLogger().info("§aLoaded with §2debug mode§a!");
+        if (configUtils.debug) {
+            this.getLogger().info("§aCurrent plugin version: §2" + getDescription().getVersion());
+            this.getLogger().info("§aEssentialsChat loaded with §2debug mode§a. Provider: §2" + provider.getClass().getSimpleName());
+        } else {
+            getLogger().info("§aEssentialsChat loaded. Provider: §2" + provider.getClass().getSimpleName());
         }
     }
 
@@ -255,17 +135,17 @@ public class EssentialsChat extends PluginBase implements Listener {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        if (isDebugEnabled()) {
+        if (configUtils.debug) {
             this.getLogger().info("§b[DEBUG] Command executed: " + command.getName() + ", sender: " + sender.getName() + ", args: " + Arrays.toString(args));
         }
 
         if (command.getName().equalsIgnoreCase("prefix")) {
             if (!(sender instanceof Player)) {
-                sender.sendMessage(msgCmdOnlyForPlayers);
                 // other debug - soon?
                 //if (isDebugEnabled()) {
                 //    getLogger().info("§b[DEBUG] Command /prefix failed: sender is not a player");
                 //}
+                sender.sendMessage(configUtils.msgCmdOnlyForPlayers);
                 return true;
             }
             Player player = (Player) sender;
@@ -274,79 +154,79 @@ public class EssentialsChat extends PluginBase implements Listener {
                 return true;
             }
             if (args.length == 0) {
-                player.sendMessage(msgPrefixUsage);
+                player.sendMessage(configUtils.msgPrefixUsage);
                 return true;
             }
             String input = args[0];
             if (input.equalsIgnoreCase("off") || input.equalsIgnoreCase("clear")) {
                 prefixManager.clearPlayerPrefix(player);
-                player.sendMessage(msgPrefixCleared);
+                player.sendMessage(configUtils.msgPrefixCleared);
                 return true;
             }
-            if (prefixBlacklist.contains(input.toLowerCase())) {
-                player.sendMessage(msgPrefixBlackList);
+            if (configUtils.prefixBlacklist.contains(input.toLowerCase())) {
+                player.sendMessage(configUtils.msgPrefixBlackList);
                 return true;
             }
-            if (input.length() < prefixMinCharacters || input.length() > prefixMaxCharacters) {
-                player.sendMessage(msgPrefixLengthError.replace("{min}", String.valueOf(prefixMinCharacters)).replace("{max}", String.valueOf(prefixMaxCharacters)));
+            if (input.length() < configUtils.prefixMinCharacters || input.length() > configUtils.prefixMaxCharacters) {
+                player.sendMessage(configUtils.msgPrefixLengthError.replace("{min}", String.valueOf(configUtils.prefixMinCharacters)).replace("{max}", String.valueOf(configUtils.prefixMaxCharacters)));
                 return true;
             }
-            if (!input.matches("^[" + allowedCharactersRegex + "]+$")) {
-                player.sendMessage(msgPrefixInvalidChars.replace("{allowed}", allowedCharactersRegex));
+            if (!input.matches("^[" + configUtils.allowedCharactersRegex + "]+$")) {
+                player.sendMessage(configUtils.msgPrefixInvalidChars.replace("{allowed}", configUtils.allowedCharactersRegex));
                 return true;
             }
             prefixManager.setPlayerPrefix(player, input);
-            player.sendMessage(msgPrefixSet.replace("{prefix}", input));
+            player.sendMessage(configUtils.msgPrefixSet.replace("{prefix}", input));
             return true;
 
         } else if (command.getName().equalsIgnoreCase("nick")) {
             if (!(sender instanceof Player)) {
-                sender.sendMessage(msgCmdOnlyForPlayers);
+                sender.sendMessage(configUtils.msgCmdOnlyForPlayers);
                 return true;
             }
             Player player = (Player) sender;
             if (args.length == 0) {
-                player.sendMessage(msgNickUsage);
+                player.sendMessage(configUtils.msgNickUsage);
                 return true;
             }
             String input = args[0];
             if (input.equalsIgnoreCase(player.getName()) || input.equalsIgnoreCase("off") || input.equalsIgnoreCase("clear")) {
                 nickManager.clearPlayerNick(player);
                 displayManager.updateDisplay(player);
-                player.sendMessage(msgNickCleared);
+                player.sendMessage(configUtils.msgNickCleared);
                 return true;
             }
-            if (nicknameBlacklist.contains(input.toLowerCase())) {
-                player.sendMessage(msgNickBlackList);
+            if (configUtils.nicknameBlacklist.contains(input.toLowerCase())) {
+                player.sendMessage(configUtils.msgNickBlackList);
                 return true;
             }
-            if (input.length() < minNickCharacters || input.length() > maxNickCharacters) {
-                player.sendMessage(msgNickMaxLimit.replace("{min}", String.valueOf(minNickCharacters)).replace("{max}", String.valueOf(maxNickCharacters)));
+            if (input.length() < configUtils.minNickCharacters || input.length() > configUtils.maxNickCharacters) {
+                player.sendMessage(configUtils.msgNickMaxLimit.replace("{min}", String.valueOf(configUtils.minNickCharacters)).replace("{max}", String.valueOf(configUtils.maxNickCharacters)));
                 return true;
             }
-            if (!input.matches("^[" + allowedCharactersInNickRegex + "]+$")) {
-                player.sendMessage(msgNickAllowedCharacters.replace("{allowed}", allowedCharactersInNickRegex));
+            if (!input.matches("^[" + configUtils.allowedCharactersInNickRegex + "]+$")) {
+                player.sendMessage(configUtils.msgNickAllowedCharacters.replace("{allowed}", configUtils.allowedCharactersInNickRegex));
                 return true;
             }
-            if (!allowDuplicateNicknames && nickManager.isUsed(input)) {
-                player.sendMessage(msgNickUsed);
+            if (!configUtils.allowDuplicateNicknames && nickManager.isUsed(input)) {
+                player.sendMessage(configUtils.msgNickUsed);
                 return true;
             }
             nickManager.setPlayerNick(player, input);
             displayManager.updateDisplay(player);
-            player.sendMessage(msgNickSuccess.replace("{nick}", input));
+            player.sendMessage(configUtils.msgNickSuccess.replace("{nick}", input));
             return true;
 
         } else if (command.getName().equalsIgnoreCase("realname")) {
             if (args.length != 1) {
-                sender.sendMessage(msgRealNameUsage);
+                sender.sendMessage(configUtils.msgRealNameUsage);
                 return true;
             }
             String real = nickManager.getRealName(args[0]);
             if (real != null) {
-                sender.sendMessage(msgRealNameOutput.replace("{player}", args[0]).replace("{nick}", real));
+                sender.sendMessage(configUtils.msgRealNameOutput.replace("{player}", args[0]).replace("{nick}", real));
             } else {
-                sender.sendMessage(msgRealNameNotFound);
+                sender.sendMessage(configUtils.msgRealNameNotFound);
             }
             return true;
         }
@@ -354,18 +234,18 @@ public class EssentialsChat extends PluginBase implements Listener {
     }
 
     public boolean isPrefixInSettingsAndHeadEnabled() {
-        return this.prefixInSettingsAndHeadEnabled;
+        return configUtils.prefixInSettingsAndHeadEnabled;
     }
 
     public String getPrefixInSettingsAndHeadFormat() {
-        return this.prefixInSettingsAndHeadFormat;
+        return configUtils.prefixInSettingsAndHeadFormat;
     }
 
     public String formatNick(String nick) {
-        if (allowColoredNick) {
-            return fakeNicknameCharacter + nick.replace('&', '§');
+        if (configUtils.allowColoredNick) {
+            return configUtils.fakeNicknameCharacter + nick.replace('&', '§');
         }
-        return fakeNicknameCharacter + nick;
+        return configUtils.fakeNicknameCharacter + nick;
     }
 
     @EventHandler
@@ -376,19 +256,19 @@ public class EssentialsChat extends PluginBase implements Listener {
         String message = event.getMessage();
         String name = player.getName();
 
-        if (chatFilterEnabled) {
+        if (configUtils.chatFilterEnabled) {
             long now = System.currentTimeMillis();
             long lastTime = lastMessageTime.getOrDefault(name, 0L);
-            long cooldownMillis = chatCooldown * 1000L;
+            long cooldownMillis = configUtils.chatCooldown * 1000L;
             long timeLeftMillis = cooldownMillis - (now - lastTime);
             if (timeLeftMillis > 0) {
                 double timeLeftSeconds = Math.ceil(timeLeftMillis / 1000.0);
-                player.sendMessage(msgCooldown.replace("{seconds}", String.valueOf(timeLeftSeconds)));
+                player.sendMessage(configUtils.msgCooldown.replace("{seconds}", String.valueOf(timeLeftSeconds)));
                 event.setCancelled(true);
                 return;
             }
-            if (message.length() > chatMaxChars) {
-                player.sendMessage(msgTooLong.replace("{max}", String.valueOf(chatMaxChars)));
+            if (message.length() > configUtils.chatMaxChars) {
+                player.sendMessage(configUtils.msgTooLong.replace("{max}", String.valueOf(configUtils.chatMaxChars)));
                 event.setCancelled(true);
                 return;
             }
@@ -396,23 +276,23 @@ public class EssentialsChat extends PluginBase implements Listener {
             int repeatCount = message.equalsIgnoreCase(lastMsg)
                     ? messageRepetitionCount.getOrDefault(name, 1) + 1
                     : 1;
-            if (repeatCount > chatMaxRepeat) {
+            if (repeatCount > configUtils.chatMaxRepeat) {
                 event.setCancelled(true);
-                switch (repetitionPunishment.toLowerCase()) {
+                switch (configUtils.repetitionPunishment.toLowerCase()) {
                     case "kick":
-                        player.kick(msgTooManyRepeat, false);
+                        player.kick(configUtils.msgTooManyRepeat, false);
                         break;
                     case "command":
-                        if (!punishmentCommand.isEmpty()) {
-                            String command = punishmentCommand.replace("{player}", player.getName());
+                        if (!configUtils.punishmentCommand.isEmpty()) {
+                            String command = configUtils.punishmentCommand.replace("{player}", player.getName());
                             getServer().dispatchCommand(getServer().getConsoleSender(), command);
                         } else {
-                            player.sendMessage(msgTooManyRepeat);
+                            player.sendMessage(configUtils.msgTooManyRepeat);
                         }
                         break;
                     case "message":
                     default:
-                        player.sendMessage(msgTooManyRepeat);
+                        player.sendMessage(configUtils.msgTooManyRepeat);
                         break;
                 }
                 return;
@@ -423,25 +303,25 @@ public class EssentialsChat extends PluginBase implements Listener {
         }
 
         String formatted;
-        switch (formatMethod) {
+        switch (configUtils.formatMethod) {
             case 2: // Single format
-                formatted = chatManager.formatChatMessage(player, singleChatFormat, message);
-                if (singleChatType.equalsIgnoreCase("local")) {
+                formatted = chatManager.formatChatMessage(player, configUtils.singleChatFormat, message);
+                if (configUtils.singleChatType.equalsIgnoreCase("local")) {
                     event.getRecipients().removeIf(p -> p instanceof Player &&
-                            ((Player) p).distance(player) > localChatRadius);
+                            ((Player) p).distance(player) > configUtils.localChatRadius);
                 }
                 break;
             case 3: // Default Minecraft format
-                formatted = chatManager.formatChatMessage(player, defaultChatFormat, message);
+                formatted = chatManager.formatChatMessage(player, configUtils.defaultChatFormat, message);
                 break;
             case 1: // L/G chat
             default:
-                if (message.startsWith(globalChatSymbol)) {
-                    formatted = chatManager.formatChatMessage(player, globalChatFormat, message.substring(globalChatSymbol.length()).trim());
+                if (message.startsWith(configUtils.globalChatSymbol)) {
+                    formatted = chatManager.formatChatMessage(player, configUtils.globalChatFormat, message.substring(configUtils.globalChatSymbol.length()).trim());
                 } else {
-                    formatted = chatManager.formatChatMessage(player, localChatFormat, message);
+                    formatted = chatManager.formatChatMessage(player, configUtils.localChatFormat, message);
                     event.getRecipients().removeIf(p -> p instanceof Player &&
-                            ((Player) p).distance(player) > localChatRadius);
+                            ((Player) p).distance(player) > configUtils.localChatRadius);
                 }
                 break;
         }
@@ -488,6 +368,10 @@ public class EssentialsChat extends PluginBase implements Listener {
     }
 
     public boolean isDebugEnabled() {
-        return debug;
+        return configUtils.debug;
+    }
+
+    public ConfigUtils getConfigUtils() {
+        return configUtils;
     }
 }

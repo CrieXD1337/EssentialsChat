@@ -29,6 +29,7 @@ import me.criex.essentialschat.managers.DisplayManager;
 import me.criex.essentialschat.managers.NickManager;
 import me.criex.essentialschat.managers.PrefixManager;
 import me.criex.essentialschat.providers.PrefixSuffixProvider;
+import me.criex.essentialschat.utils.ConfigUtils;
 
 public class EssentialsChatAPIImpl implements EssentialsChatAPI {
     private final NickManager nickManager;
@@ -36,7 +37,7 @@ public class EssentialsChatAPIImpl implements EssentialsChatAPI {
     private final PrefixSuffixProvider provider;
     private final DisplayManager displayManager;
 
-    public EssentialsChatAPIImpl(NickManager nickManager, PrefixManager prefixManager, PrefixSuffixProvider provider, DisplayManager displayManager) {
+    public EssentialsChatAPIImpl(NickManager nickManager, PrefixManager prefixManager, PrefixSuffixProvider provider, DisplayManager displayManager, ConfigUtils configUtils) {
         this.nickManager = nickManager;
         this.prefixManager = prefixManager;
         this.provider = provider;
