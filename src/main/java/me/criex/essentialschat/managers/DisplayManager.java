@@ -42,9 +42,9 @@ public class DisplayManager {
 
     public void updateDisplay(Player player) {
         if (!configUtils.prefixInSettingsAndHeadEnabled) {
-            if (configUtils.debug) {
-                plugin.getLogger().info("§b[DEBUG] Prefix in settings and head is disabled, skipping display update for player: " + player.getName());
-            }
+            //if (configUtils.debug) {
+            //    plugin.getLogger().info("§b[DEBUG] Prefix in settings and head is disabled, skipping display update for player: " + player.getName());
+            //}
             return;
         }
 
