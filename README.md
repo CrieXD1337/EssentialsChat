@@ -88,11 +88,11 @@ Check the full configuration files in the [repository](https://github.com/CriexD
 
 ## 📜 Commands
 
-| Command | Description | Permission | Usage                           |
-|---------|-------------|------------|---------------------------------|
-| `/prefix <prefix\|off>` | Set or clear your prefix | `essentialschat.prefix.setprefix` | `/prefix VIP` or `/prefix off`  |
-| `/nick <nick\|off>` | Set or clear your nickname | `essentialschat.nick.setnick` | `/nick Nick` or `/nick off` |
-| `/realname <player>` | Find a player's real name | `essentialschat.nick.realname` | `/realname Nick`                |
+| Command | Description | Permission                         | Usage                           |
+|---------|-------------|------------------------------------|---------------------------------|
+| `/prefix <prefix\|off>` | Set or clear your prefix | `essentialschat.commands.prefix`   | `/prefix VIP` or `/prefix off`  |
+| `/nick <nick\|off>` | Set or clear your nickname | `essentialschat.commands.nick`     | `/nick Nick` or `/nick off` |
+| `/realname <player>` | Find a player's real name | `essentialschat.commands.realname` | `/realname Nick`                |
 
 **Note**: By default, these permissions are granted to operators (`op`). Configure permissions using LuckPerms or Multipass for other players.
 
