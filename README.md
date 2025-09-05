@@ -132,7 +132,7 @@ String prefix = api.getPrefix(player);
 String suffix = api.getSuffix(player);
 ```
 
-For more details, check the [API documentation](https://github.com/CriexD1337/EssentialsChat/tree/master/src/main/java/me/criex/essentialschat/api).
+For more details, check the [API documentation](./API.md).
 
 ---
 
