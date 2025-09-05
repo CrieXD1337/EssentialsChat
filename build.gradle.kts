@@ -34,6 +34,8 @@ repositories {
 dependencies {
     compileOnly("cn.nukkit:nukkit:1.0-SNAPSHOT")
     compileOnly("net.luckperms:api:5.4")
+    compileOnly("org.projectlombok:lombok:1.18.36")
+    annotationProcessor("org.projectlombok:lombok:1.18.36")
     implementation(files("libs/Multipass-1.1.6.jar"))
 }
 
