@@ -9,20 +9,10 @@ softdepend:
   - "Multipass"
 author: "Criex"
 description: Chat plugin with global and local chat support for LuckPerms or Multipass
-commands:
-  prefix:
-    permission: essentialschat.prefix.setprefix
-    description: Change your prefix
-  nick:
-    permssion: essentialschat.nick.setnick
-    description: Change your fake nick
-  realname:
-    permision: essentialschat.nick.realname
-    description: Get player's real name
 permissions:
-  essentialschat.prefix.setprefix:
+  essentialschat.commands.prefix:
     default: op
-  essentialschat.nick.setnick:
+  essentialschat.commands.nick:
     default: op
-  essentialschat.nick.realname:
+  essentialschat.commands.realname:
     default: op

@@ -1,0 +1,17 @@
+prefix:
+  name: "prefix"
+  description: "Set or clear a custom prefix for your name in chat"
+  aliases: [setprefix, pfx]
+  permission: essentialschat.commands.prefix
+
+nick:
+  name: "nick"
+  description: "Set or clear a custom nickname for your player"
+  aliases: [nickname, setnick]
+  permission: essentialschat.commands.nick
+
+realname:
+  name: "realname"
+  description: "Look up the real name behind a nickname"
+  aliases: [rn]
+  permission: essentialschat.commands.realname
