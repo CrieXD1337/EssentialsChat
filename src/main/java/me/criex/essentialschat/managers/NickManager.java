@@ -25,12 +25,16 @@
 package me.criex.essentialschat.managers;
 
 import cn.nukkit.Player;
+import lombok.Getter;
+import lombok.Setter;
 import me.criex.essentialschat.EssentialsChat;
 import me.criex.essentialschat.utils.ConfigUtils;
 
 import java.util.HashMap;
 import java.util.Map;
 
+@Getter
+@Setter
 public class NickManager {
     private final EssentialsChat plugin;
     private final ConfigUtils configUtils;
@@ -42,38 +46,38 @@ public class NickManager {
     }
 
     public void setPlayerNick(Player player, String nick) {
-        if (configUtils.debug) {
+        if (configUtils.isDebug()) {
             plugin.getLogger().info("§b[DEBUG] Setting nick for player: " + player.getName() + ", nick: " + nick);
         }
         playerNicks.put(player.getName(), nick);
-        if (configUtils.debug) {
+        if (configUtils.isDebug()) {
             plugin.getLogger().info("§b[DEBUG] Successfully set nick for player: " + player.getName() + ", nick: " + nick);
         }
     }
 
     public void clearPlayerNick(Player player) {
-        if (configUtils.debug) {
+        if (configUtils.isDebug()) {
             plugin.getLogger().info("§b[DEBUG] Clearing nick for player: " + player.getName());
         }
         playerNicks.remove(player.getName());
-        if (configUtils.debug) {
+        if (configUtils.isDebug()) {
             plugin.getLogger().info("§b[DEBUG] Successfully cleared nick for player: " + player.getName());
         }
     }
 
     public String getRealName(String fakeNick) {
-        if (configUtils.debug) {
+        if (configUtils.isDebug()) {
             plugin.getLogger().info("§b[DEBUG] Looking up real name for nick: " + fakeNick);
         }
         for (Map.Entry<String, String> entry : playerNicks.entrySet()) {
             if (entry.getValue().equalsIgnoreCase(fakeNick)) {
-                if (configUtils.debug) {
+                if (configUtils.isDebug()) {
                     plugin.getLogger().info("§b[DEBUG] Found real name: " + entry.getKey() + " for nick: " + fakeNick);
                 }
                 return entry.getKey();
             }
         }
-        if (configUtils.debug) {
+        if (configUtils.isDebug()) {
             plugin.getLogger().info("§b[DEBUG] No real name found for nick: " + fakeNick);
         }
         return null;
@@ -90,14 +94,14 @@ public class NickManager {
 
     public boolean isUsed(String nick) {
         boolean used = playerNicks.containsValue(nick);
-        if (configUtils.debug) {
+        if (configUtils.isDebug()) {
             plugin.getLogger().info("§b[DEBUG] Checking if nick is used: " + nick + ", result: " + used);
         }
         return used;
     }
 
     public Map<String, String> getAllNicks() {
-        if (configUtils.debug) {
+        if (configUtils.isDebug()) {
             plugin.getLogger().info("§b[DEBUG] Retrieving all nicks: " + playerNicks);
         }
         return playerNicks;

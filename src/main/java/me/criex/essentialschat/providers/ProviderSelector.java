@@ -26,10 +26,14 @@ package me.criex.essentialschat.providers;
 
 import cn.nukkit.plugin.PluginManager;
 import cn.nukkit.utils.Config;
+import lombok.Getter;
+import lombok.Setter;
 import me.criex.essentialschat.EssentialsChat;
 
 import java.io.File;
 
+@Getter
+@Setter
 public class ProviderSelector {
     public static PrefixSuffixProvider selectProvider(EssentialsChat plugin) {
         PluginManager pluginManager = plugin.getServer().getPluginManager();
@@ -39,7 +43,7 @@ public class ProviderSelector {
         boolean hasMultipass = pluginManager.getPlugin("Multipass") != null;
         String configProvider = providerConfig.getString("provider", "luckperms").toLowerCase();
 
-        if (plugin.isDebugEnabled()) {
+        if (plugin.getConfigUtils().isDebug()) {
             plugin.getLogger().info("§b[DEBUG] Selecting provider: LuckPerms=" + hasLuckPerms + ", Multipass=" + hasMultipass + ", ConfigProvider=" + configProvider);
         }
 
@@ -48,7 +52,7 @@ public class ProviderSelector {
             if (!configProvider.equals("luckperms")) {
                 providerConfig.set("provider", "luckperms");
                 providerConfig.save();
-                if (plugin.isDebugEnabled()) {
+                if (plugin.getConfigUtils().isDebug()) {
                     plugin.getLogger().info("§b[DEBUG] Auto-set provider to LuckPerms in provider.yml");
                 }
             }
@@ -57,7 +61,7 @@ public class ProviderSelector {
             if (!configProvider.equals("multipass")) {
                 providerConfig.set("provider", "multipass");
                 providerConfig.save();
-                if (plugin.isDebugEnabled()) {
+                if (plugin.getConfigUtils().isDebug()) {
                     plugin.getLogger().info("§b[DEBUG] Auto-set provider to Multipass in provider.yml");
                 }
             }
@@ -66,7 +70,7 @@ public class ProviderSelector {
             if (!configProvider.equals("fallback")) {
                 providerConfig.set("provider", "fallback");
                 providerConfig.save();
-                if (plugin.isDebugEnabled()) {
+                if (plugin.getConfigUtils().isDebug()) {
                     plugin.getLogger().info("§b[DEBUG] Auto-set provider to Fallback in provider.yml");
                 }
             }

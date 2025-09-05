@@ -25,7 +25,11 @@
 package me.criex.essentialschat.providers;
 
 import cn.nukkit.Player;
+import lombok.Getter;
+import lombok.Setter;
 
+@Getter
+@Setter
 public class FallbackProvider implements PrefixSuffixProvider {
     @Override
     public String getPrefix(Player player) {

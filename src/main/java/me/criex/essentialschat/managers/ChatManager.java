@@ -25,10 +25,14 @@
 package me.criex.essentialschat.managers;
 
 import cn.nukkit.Player;
+import lombok.Getter;
+import lombok.Setter;
 import me.criex.essentialschat.EssentialsChat;
 import me.criex.essentialschat.providers.PrefixSuffixProvider;
 import me.criex.essentialschat.utils.ConfigUtils;
 
+@Getter
+@Setter
 public class ChatManager {
     private final PrefixSuffixProvider provider;
     private final ConfigUtils configUtils;
@@ -39,7 +43,7 @@ public class ChatManager {
     }
 
     public String formatChatMessage(Player player, String format, String message) {
-        if (configUtils.debug) {
+        if (configUtils.isDebug()) {
             EssentialsChat.getInstance().getLogger().info("§b[DEBUG] Formatting chat message for player: " + player.getName() + ", format: " + format + ", message: " + message);
         }
 
@@ -48,10 +52,10 @@ public class ChatManager {
         String nick = EssentialsChat.getInstance().getNickManager().getPlayerNick(player);
         String name = nick != null ? EssentialsChat.getInstance().formatNick(nick) : player.getName();
         if (player.isOp() && (nick == null || !nick.contains("§"))) {
-            name = "§" + configUtils.opNicknameColor + name + "§r";
+            name = "§" + configUtils.getOpNicknameColor() + name + "§r";
         }
 
-        if (configUtils.debug) {
+        if (configUtils.isDebug()) {
             EssentialsChat.getInstance().getLogger().info("§b[DEBUG] Player: " + player.getName() + ", prefix: " + (prefix != null ? prefix : "none") + ", suffix: " + (suffix != null ? suffix : "none") + ", nick: " + (nick != null ? nick : "none") + ", formatted name: " + name);
         }
 

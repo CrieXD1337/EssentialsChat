@@ -25,8 +25,12 @@
 package me.criex.essentialschat.providers;
 
 import cn.nukkit.Player;
+import lombok.Getter;
+import lombok.Setter;
 import ru.nukkit.multipass.Multipass;
 
+@Getter
+@Setter
 public class MultipassProvider implements PrefixSuffixProvider {
 
     @Override

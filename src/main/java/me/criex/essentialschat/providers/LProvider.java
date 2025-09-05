@@ -25,10 +25,14 @@
 package me.criex.essentialschat.providers;
 
 import cn.nukkit.Player;
+import lombok.Getter;
+import lombok.Setter;
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.LuckPermsProvider;
 import net.luckperms.api.model.user.User;
 
+@Getter
+@Setter
 public class LProvider implements PrefixSuffixProvider {
 
     private final LuckPerms luckPerms;
@@ -51,9 +55,5 @@ public class LProvider implements PrefixSuffixProvider {
         return user != null && user.getCachedData().getMetaData().getSuffix() != null
                 ? user.getCachedData().getMetaData().getSuffix()
                 : "";
-    }
-
-    public LuckPerms getLuckPerms() {
-        return luckPerms;
     }
 }

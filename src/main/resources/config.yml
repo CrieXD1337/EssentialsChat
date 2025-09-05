@@ -2,6 +2,12 @@
 #       GLOBAL SETTINGS         #
 # - - - - - - - - - - - - - - - #
 
+# Available languages now:
+# en - English
+# zh - 中国人
+# Language properties file in `/lang` directory
+language: en
+
 # Color for OP players. For example, b = §b
 op-nickname-color: "4"
 

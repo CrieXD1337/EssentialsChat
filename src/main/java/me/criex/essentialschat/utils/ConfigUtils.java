@@ -1,17 +1,44 @@
+/*
+ * This file is part of EssentialsChat, licensed under the MIT License.
+ *
+ *  Copyright (c) Ivan [CrieXD1337] <criex1337@gmail.com>
+ *  Copyright (c) contributors
+ *
+ *  Permission is hereby granted, free of charge, to any person obtaining a copy
+ *  of this software and associated documentation files (the "Software"), to deal
+ *  in the Software without restriction, including without limitation the rights
+ *  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ *  copies of the Software, and to permit persons to whom the Software is
+ *  furnished to do so, subject to the following conditions:
+ *
+ *  The above copyright notice and this permission notice shall be included in all
+ *  copies or substantial portions of the Software.
+ *
+ *  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ *  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ *  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ *  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ *  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ *  SOFTWARE.
+ */
 package me.criex.essentialschat.utils;
 
 import cn.nukkit.utils.Config;
 import cn.nukkit.utils.TextFormat;
+import lombok.Getter;
+import lombok.Setter;
 import me.criex.essentialschat.EssentialsChat;
 
 import java.io.File;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Getter
+@Setter
 public class ConfigUtils {
     private final EssentialsChat main;
     private final Config config;
-    private final Config messagesConfig;
 
     // Settings
     public List<String> nicknameBlacklist;
@@ -43,36 +70,14 @@ public class ConfigUtils {
     public int chatCooldown;
     public int chatMaxChars;
     public int chatMaxRepeat;
-
-    // Messages
-    public String msgPrefixSet;
-    public String msgPrefixCleared;
-    public String msgInvalidProvider;
-    public String msgPrefixBlackList;
-    public String msgNickSuccess;
-    public String msgNickCleared;
-    public String msgNickBlackList;
-    public String msgNickUsed;
-    public String msgNickUsage;
-    public String msgRealNameUsage;
-    public String msgRealNameOutput;
-    public String msgRealNameNotFound;
-    public String msgPrefixLengthError;
-    public String msgPrefixInvalidChars;
-    public String msgCmdOnlyForPlayers;
-    public String msgPrefixUsage;
-    public String msgCooldown;
-    public String msgTooLong;
-    public String msgTooManyRepeat;
-    public String msgNickMaxLimit;
-    public String msgNickAllowedCharacters;
+    public String language;
 
     public ConfigUtils(EssentialsChat main) {
         this.main = main;
         this.main.saveDefaultConfig();
-        this.main.saveResource("messages.yml");
+        this.main.saveResource("lang/en.lang");
+        this.main.saveResource("lang/zh.lang");
         this.config = main.getConfig();
-        this.messagesConfig = new Config(new File(main.getDataFolder(), "messages.yml"), Config.YAML);
         loadConfig();
     }
 
@@ -87,6 +92,7 @@ public class ConfigUtils {
 
         // General settings
         debug = config.getBoolean("debug", false);
+        language = config.getString("language", "en");
 
         // Chat format settings
         formatMethod = config.getInt("chat-formatting.format-method", 1);
@@ -142,34 +148,10 @@ public class ConfigUtils {
             main.getLogger().warning("§ePunishment command is empty for 'Command' repetition-punishment. Defaulting to 'Message'.");
             repetitionPunishment = "Message";
         }
-
-        // Messages
-        msgPrefixSet = TextFormat.colorize(messagesConfig.getString("prefix-set", "§7> §fYour prefix successfully moved to: §b{prefix}"));
-        msgPrefixCleared = TextFormat.colorize(messagesConfig.getString("prefix-cleared", "§7> §fYour prefix was §ccleared"));
-        msgInvalidProvider = TextFormat.colorize(messagesConfig.getString("invalid-provider", "§7> §cProvider §4{provider} §cis currently not available for prefixes. Use §4LuckPerms."));
-        msgPrefixBlackList = TextFormat.colorize(messagesConfig.getString("prefix-in-blacklist", "§7> §cThis prefix is banned!"));
-        msgNickSuccess = TextFormat.colorize(messagesConfig.getString("nick-success", "§7> §fYour nickname changed to §b{nick}"));
-        msgNickCleared = TextFormat.colorize(messagesConfig.getString("nick-cleared", "§7> §fYour nickname §ccleared"));
-        msgNickBlackList = TextFormat.colorize(messagesConfig.getString("nick-in-blacklist", "§7> §cThis nickname is banned!"));
-        msgNickUsed = TextFormat.colorize(messagesConfig.getString("nick-used", "§7> §cThis nickname is already in use!"));
-        msgNickUsage = TextFormat.colorize(messagesConfig.getString("nick-usage", "§7> §cUsage: §e/nick <nick>"));
-        msgRealNameUsage = TextFormat.colorize(messagesConfig.getString("realname-usage", "§7> §cUsage: §e/realname <player>"));
-        msgRealNameOutput = TextFormat.colorize(messagesConfig.getString("realname-output", "§7> §fReal name of player §b{player}: §3{nick}"));
-        msgRealNameNotFound = TextFormat.colorize(messagesConfig.getString("realname-not-found", "§7> §cPlayer not found!"));
-        msgPrefixLengthError = TextFormat.colorize(messagesConfig.getString("prefix-length-error", "§7> §cThe prefix must be between §4{min}§c and §4{max}§c characters."));
-        msgPrefixInvalidChars = TextFormat.colorize(messagesConfig.getString("prefix-invalid-characters", "§cPrefix contains invalid characters! Only allowed: §4{allowed}"));
-        msgCmdOnlyForPlayers = TextFormat.colorize(messagesConfig.getString("command-only-for-players", "§cAllowed only for players!"));
-        msgPrefixUsage = TextFormat.colorize(messagesConfig.getString("invalid-usage", "§7> §cUsage: §e/prefix <prefix|off>"));
-        msgCooldown = TextFormat.colorize(messagesConfig.getString("cooldown-for-messages", "§7> §cWait §b{seconds} §cseconds"));
-        msgTooLong = TextFormat.colorize(messagesConfig.getString("max-message-characters", "§7> §cMaximum characters in message - §b{max}§c!"));
-        msgTooManyRepeat = TextFormat.colorize(messagesConfig.getString("max-messages-repetition", "§7> §cYou are sending the same message too many times!"));
-        msgNickMaxLimit = TextFormat.colorize(messagesConfig.getString("nick-characters-limit", "§7> §cNickname must be from §b{min}§c to §b{max} §ccharacters!"));
-        msgNickAllowedCharacters = TextFormat.colorize(messagesConfig.getString("nick-allowed-characters", "§cInvalid characters! Allowed: §4{allowed}"));
     }
 
     public void reloadConfig() {
         main.reloadConfig();
-        messagesConfig.reload();
         loadConfig();
     }
 }

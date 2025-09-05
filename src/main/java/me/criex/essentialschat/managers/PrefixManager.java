@@ -25,6 +25,8 @@
 package me.criex.essentialschat.managers;
 
 import cn.nukkit.Player;
+import lombok.Getter;
+import lombok.Setter;
 import ru.nukkit.multipass.Multipass;
 import me.criex.essentialschat.EssentialsChat;
 import me.criex.essentialschat.providers.LProvider;
@@ -32,6 +34,8 @@ import me.criex.essentialschat.providers.MultipassProvider;
 import me.criex.essentialschat.providers.PrefixSuffixProvider;
 import me.criex.essentialschat.utils.ConfigUtils;
 
+@Getter
+@Setter
 public class PrefixManager {
     private final EssentialsChat plugin;
     private final PrefixSuffixProvider provider;
@@ -44,7 +48,7 @@ public class PrefixManager {
     }
 
     public void setPlayerPrefix(Player player, String prefix) {
-        if (configUtils.debug) {
+        if (configUtils.isDebug()) {
             plugin.getLogger().info("§b[DEBUG] Attempting to set prefix for player: " + player.getName() + ", prefix: " + prefix);
         }
 
@@ -63,12 +67,12 @@ public class PrefixManager {
                                     .invoke(null, formattedPrefix, 126483);
                             user.getClass().getMethod("data").invoke(user).getClass().getMethod("add", Class.forName("net.luckperms.api.node.Node")).invoke(user.getClass().getMethod("data").invoke(user), prefixNode);
                             userManager.getClass().getMethod("saveUser", user.getClass()).invoke(userManager, user);
-                            if (configUtils.debug) {
+                            if (configUtils.isDebug()) {
                                 plugin.getLogger().info("§b[DEBUG] Successfully set LuckPerms prefix for player: " + player.getName() + ", prefix: " + formattedPrefix);
                             }
                         } catch (Exception e) {
                             plugin.getLogger().warning("Failed to set LuckPerms prefix: " + e.getMessage());
-                            if (configUtils.debug) {
+                            if (configUtils.isDebug()) {
                                 plugin.getLogger().info("§b[DEBUG] Error setting LuckPerms prefix for player: " + player.getName() + ", error: " + e.getMessage());
                             }
                         }
@@ -76,24 +80,24 @@ public class PrefixManager {
                 });
             } catch (ClassNotFoundException | NoClassDefFoundError e) {
                 plugin.getLogger().warning("LuckPerms not found when trying to set prefix!");
-                if (configUtils.debug) {
+                if (configUtils.isDebug()) {
                     plugin.getLogger().info("§b[DEBUG] LuckPerms not found for player: " + player.getName());
                 }
             } catch (Exception e) {
                 plugin.getLogger().warning("Error setting LuckPerms prefix: " + e.getMessage());
-                if (configUtils.debug) {
+                if (configUtils.isDebug()) {
                     plugin.getLogger().info("§b[DEBUG] General error setting LuckPerms prefix for player: " + player.getName() + ", error: " + e.getMessage());
                 }
             }
         } else if (provider instanceof MultipassProvider) {
             try {
                 Multipass.setPlayerPrefix(player, formattedPrefix, null, 100);
-                if (configUtils.debug) {
+                if (configUtils.isDebug()) {
                     plugin.getLogger().info("§b[DEBUG] Successfully set Multipass prefix for player: " + player.getName() + ", prefix: " + formattedPrefix);
                 }
             } catch (Exception e) {
                 plugin.getLogger().warning("Failed to set prefix with Multipass: " + e.getMessage());
-                if (configUtils.debug) {
+                if (configUtils.isDebug()) {
                     plugin.getLogger().info("§b[DEBUG] Error setting Multipass prefix for player: " + player.getName() + ", error: " + e.getMessage());
                 }
             }
@@ -101,7 +105,7 @@ public class PrefixManager {
     }
 
     public void clearPlayerPrefix(Player player) {
-        if (configUtils.debug) {
+        if (configUtils.isDebug()) {
             plugin.getLogger().info("§b[DEBUG] Attempting to clear prefix for player: " + player.getName());
         }
 
@@ -123,12 +127,12 @@ public class PrefixManager {
                                 }
                             });
                             userManager.getClass().getMethod("saveUser", user.getClass()).invoke(userManager, user);
-                            if (configUtils.debug) {
+                            if (configUtils.isDebug()) {
                                 plugin.getLogger().info("§b[DEBUG] Successfully cleared LuckPerms prefix for player: " + player.getName());
                             }
                         } catch (Exception e) {
                             plugin.getLogger().warning("Failed to clear LuckPerms prefix: " + e.getMessage());
-                            if (configUtils.debug) {
+                            if (configUtils.isDebug()) {
                                 plugin.getLogger().info("§b[DEBUG] Error clearing LuckPerms prefix for player: " + player.getName() + ", error: " + e.getMessage());
                             }
                         }
@@ -136,24 +140,24 @@ public class PrefixManager {
                 });
             } catch (ClassNotFoundException | NoClassDefFoundError e) {
                 plugin.getLogger().warning("LuckPerms not found when trying to clear prefix!");
-                if (configUtils.debug) {
+                if (configUtils.isDebug()) {
                     plugin.getLogger().info("§b[DEBUG] LuckPerms not found when clearing prefix for player: " + player.getName());
                 }
             } catch (Exception e) {
                 plugin.getLogger().warning("Error clearing LuckPerms prefix: " + e.getMessage());
-                if (configUtils.debug) {
+                if (configUtils.isDebug()) {
                     plugin.getLogger().info("§b[DEBUG] General error clearing LuckPerms prefix for player: " + player.getName() + ", error: " + e.getMessage());
                 }
             }
         } else if (provider instanceof MultipassProvider) {
             try {
                 Multipass.setPlayerPrefix(player, "", null, 100);
-                if (configUtils.debug) {
+                if (configUtils.isDebug()) {
                     plugin.getLogger().info("§b[DEBUG] Successfully cleared Multipass prefix for player: " + player.getName());
                 }
             } catch (Exception e) {
                 plugin.getLogger().warning("Failed to clear prefix with Multipass: " + e.getMessage());
-                if (configUtils.debug) {
+                if (configUtils.isDebug()) {
                     plugin.getLogger().info("§b[DEBUG] Error clearing Multipass prefix for player: " + player.getName() + ", error: " + e.getMessage());
                 }
             }

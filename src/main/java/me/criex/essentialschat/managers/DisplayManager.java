@@ -25,10 +25,14 @@
 package me.criex.essentialschat.managers;
 
 import cn.nukkit.Player;
+import lombok.Getter;
+import lombok.Setter;
 import me.criex.essentialschat.EssentialsChat;
 import me.criex.essentialschat.providers.PrefixSuffixProvider;
 import me.criex.essentialschat.utils.ConfigUtils;
 
+@Getter
+@Setter
 public class DisplayManager {
     private final EssentialsChat plugin;
     private final PrefixSuffixProvider provider;
@@ -41,7 +45,7 @@ public class DisplayManager {
     }
 
     public void updateDisplay(Player player) {
-        if (!configUtils.prefixInSettingsAndHeadEnabled) {
+        if (!configUtils.isPrefixInSettingsAndHeadEnabled()) {
             //if (configUtils.debug) {
             //    plugin.getLogger().info("§b[DEBUG] Prefix in settings and head is disabled, skipping display update for player: " + player.getName());
             //}
@@ -57,17 +61,17 @@ public class DisplayManager {
         String nick = plugin.getNickManager().getPlayerNick(player);
         String name = nick != null ? plugin.formatNick(nick) : player.getName();
 
-        if (configUtils.debug) {
+        if (configUtils.isDebug()) {
             plugin.getLogger().info("§b[DEBUG] Player: " + player.getName() + ", prefix: " + (prefix != null ? prefix : "none") + ", suffix: " + (suffix != null ? suffix : "none") + ", nick: " + (nick != null ? nick : "none") + ", formatted name: " + name);
         }
 
-        String display = configUtils.prefixInSettingsAndHeadFormat
+        String display = configUtils.getPrefixInSettingsAndHeadFormat()
                 .replace("{prefix}", prefix != null ? prefix : "")
                 .replace("{player}", name)
                 .replace("{suffix}", suffix != null ? suffix : "");
         display = plugin.parsePlaceholders(player, display);
 
-        if (configUtils.debug) {
+        if (configUtils.isDebug()) {
             plugin.getLogger().info("§b[DEBUG] Set display name and nametag for player: " + player.getName() + ", result: " + display);
         }
 
