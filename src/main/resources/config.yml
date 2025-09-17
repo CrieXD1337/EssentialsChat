@@ -3,10 +3,12 @@
 # - - - - - - - - - - - - - - - #
 
 # Available languages now:
-# en - English
-# zh - 中国人
+# default - system server language
+# eng - English
+# zho - 中国人
+# rus - Русский
 # Language properties file in `/lang` directory
-language: en
+language: default
 
 # Color for OP players. For example, b = §b
 op-nickname-color: "4"

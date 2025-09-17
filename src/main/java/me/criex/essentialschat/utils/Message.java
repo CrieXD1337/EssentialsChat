@@ -42,13 +42,39 @@ public class Message {
 
     public Message(EssentialsChat plugin) {
         this.plugin = plugin;
-        this.language = plugin.getConfig().getString("language", "en");
+        this.language = plugin.getConfig().getString("language", "default");
         this.messages = new Properties();
         loadMessages();
     }
 
     private void loadMessages() {
-        String langFile = language.equals("zh") ? "zh.lang" : "en.lang";
+        String langFile;
+        if (language.equals("default")) {
+            String serverLang = plugin.getServer().getLanguage().getLang();
+            switch (serverLang.toLowerCase()) {
+                case "rus":
+                    langFile = "rus.lang";
+                    break;
+                case "zho":
+                    langFile = "zho.lang";
+                    break;
+                default:
+                    langFile = "eng.lang";
+                    break;
+            }
+        } else {
+            switch (language.toLowerCase()) {
+                case "rus":
+                    langFile = "rus.lang";
+                    break;
+                case "zho":
+                    langFile = "zho.lang";
+                    break;
+                default:
+                    langFile = "eng.lang";
+                    break;
+            }
+        }
         File file = new File(plugin.getDataFolder() + "/lang/" + langFile);
         if (!file.exists()) {
             plugin.saveResource("lang/" + langFile);

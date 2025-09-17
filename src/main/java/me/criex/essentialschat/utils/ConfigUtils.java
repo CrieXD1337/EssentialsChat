@@ -75,8 +75,9 @@ public class ConfigUtils {
     public ConfigUtils(EssentialsChat main) {
         this.main = main;
         this.main.saveDefaultConfig();
-        this.main.saveResource("lang/en.lang");
-        this.main.saveResource("lang/zh.lang");
+        this.main.saveResource("lang/eng.lang");
+        this.main.saveResource("lang/zho.lang");
+        this.main.saveResource("lang/rus.lang");
         this.config = main.getConfig();
         loadConfig();
     }
@@ -92,7 +93,7 @@ public class ConfigUtils {
 
         // General settings
         debug = config.getBoolean("debug", false);
-        language = config.getString("language", "en");
+        language = config.getString("language", "default");
 
         // Chat format settings
         formatMethod = config.getInt("chat-formatting.format-method", 1);
