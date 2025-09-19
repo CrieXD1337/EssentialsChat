@@ -45,7 +45,7 @@ public class DisplayManager {
     }
 
     public void updateDisplay(Player player) {
-        if (!configUtils.isPrefixInSettingsAndHeadEnabled()) {
+        if (!configUtils.isPrefixNameTagEnabled()) {
             //if (configUtils.debug) {
             //    plugin.getLogger().info("§b[DEBUG] Prefix in settings and head is disabled, skipping display update for player: " + player.getName());
             //}
@@ -65,7 +65,7 @@ public class DisplayManager {
             plugin.getLogger().info("§b[DEBUG] Player: " + player.getName() + ", prefix: " + (prefix != null ? prefix : "none") + ", suffix: " + (suffix != null ? suffix : "none") + ", nick: " + (nick != null ? nick : "none") + ", formatted name: " + name);
         }
 
-        String display = configUtils.getPrefixInSettingsAndHeadFormat()
+        String display = configUtils.getPrefixNameTagFormat()
                 .replace("{prefix}", prefix != null ? prefix : "")
                 .replace("{player}", name)
                 .replace("{suffix}", suffix != null ? suffix : "");

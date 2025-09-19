@@ -37,6 +37,7 @@ import me.criex.essentialschat.managers.*;
 import me.criex.essentialschat.providers.FallbackProvider;
 import me.criex.essentialschat.providers.PrefixSuffixProvider;
 import me.criex.essentialschat.providers.ProviderSelector;
+import me.criex.essentialschat.task.NameTagUpdateTask;
 import me.criex.essentialschat.utils.ConfigUtils;
 import me.criex.essentialschat.utils.Message;
 
@@ -68,7 +69,7 @@ public class EssentialsChat extends PluginBase {
     private final Map<String, String> lastPlayerMessage = new HashMap<>();
     private final Map<String, Integer> messageRepetitionCount = new HashMap<>();
 
-    private Timer updateTimer;
+    private int updateTaskId;
     private CommandRegistry commandRegistry;
 
     public static EssentialsChat getInstance() {
@@ -144,7 +145,9 @@ public class EssentialsChat extends PluginBase {
 
     @Override
     public void onDisable() {
-        if (updateTimer != null) updateTimer.cancel();
+        if (updateTaskId != 0) {
+            getServer().getScheduler().cancelTask(updateTaskId);
+        }
     }
 
     @Override
@@ -160,15 +163,10 @@ public class EssentialsChat extends PluginBase {
     }
 
     private void startUpdateTimer() {
-        updateTimer = new Timer();
-        updateTimer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                for (Player player : getServer().getOnlinePlayers().values()) {
-                    displayManager.updateDisplay(player);
-                }
-            }
-        }, 0, 5000);
+        updateTaskId = getServer().getScheduler().scheduleRepeatingTask(
+                new NameTagUpdateTask(this, displayManager),
+                (int) (configUtils.getPrefixNameTagUpdate() * 20)
+        ).getTaskId();
     }
 
     public String parsePlaceholders(Player player, String text) {

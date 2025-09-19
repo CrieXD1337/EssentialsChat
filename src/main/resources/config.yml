@@ -50,9 +50,10 @@ chat-formatting:
 debug: false
 
 # Prefix in settings [ESC] and in display name
-prefix-in-settings-and-head:
+prefix-nametag:
   enabled: false
   format: "[{prefix}] {player}{suffix}"
+  update: 20 # interval between name tag updates in seconds
 
 # - - - - - - - - - - - - - - - #
 #       /prefix command         #

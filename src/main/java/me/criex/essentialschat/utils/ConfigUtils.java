@@ -56,8 +56,9 @@ public class ConfigUtils {
     public boolean allowColoredNick;
     public String fakeNicknameCharacter;
     public boolean allowDuplicateNicknames;
-    public boolean prefixInSettingsAndHeadEnabled;
-    public String prefixInSettingsAndHeadFormat;
+    public boolean prefixNameTagEnabled;
+    public String prefixNameTagFormat;
+    public long prefixNameTagUpdate;
     public int prefixMaxCharacters;
     public int prefixMinCharacters;
     public int maxNickCharacters;
@@ -106,8 +107,9 @@ public class ConfigUtils {
         defaultChatFormat = TextFormat.colorize(config.getString("chat-formatting.default-chat-format", "§r<{prefix}§r{player}{suffix}§r> §f{msg}"));
 
         // Prefix settings
-        prefixInSettingsAndHeadEnabled = config.getBoolean("prefix.prefix-in-settings-and-head.enabled", false);
-        prefixInSettingsAndHeadFormat = TextFormat.colorize(config.getString("prefix.prefix-in-settings-and-head.format"));
+        prefixNameTagEnabled = config.getBoolean("prefix-nametag.enabled", false);
+        prefixNameTagFormat = TextFormat.colorize(config.getString("prefix-nametag.format"));
+        prefixNameTagUpdate = config.getLong("prefix-nametag.update", 20L);
         prefixMaxCharacters = config.getInt("prefix.max-characters-in-prefix", 15);
         prefixMinCharacters = config.getInt("prefix.min-characters-in-prefix", 3);
         allowedCharactersRegex = config.getString("prefix.allowed-characters", "A-Za-z0-9_-");
