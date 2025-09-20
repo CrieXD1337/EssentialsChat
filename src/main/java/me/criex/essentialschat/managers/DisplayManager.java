@@ -22,6 +22,7 @@
  *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  *  SOFTWARE.
  */
+
 package me.criex.essentialschat.managers;
 
 import cn.nukkit.Player;
@@ -59,7 +60,7 @@ public class DisplayManager {
         String prefix = provider.getPrefix(player);
         String suffix = provider.getSuffix(player);
         String nick = plugin.getNickManager().getPlayerNick(player);
-        String name = nick != null ? plugin.formatNick(nick) : player.getName();
+        String name = nick != null && !nick.isEmpty() ? plugin.formatNick(nick) : player.getName();
 
         if (configUtils.isDebug()) {
             plugin.getLogger().info("§b[DEBUG] Player: " + player.getName() + ", prefix: " + (prefix != null ? prefix : "none") + ", suffix: " + (suffix != null ? suffix : "none") + ", nick: " + (nick != null ? nick : "none") + ", formatted name: " + name);

@@ -22,6 +22,7 @@
  *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  *  SOFTWARE.
  */
+
 package me.criex.essentialschat;
 
 import cn.nukkit.Player;
@@ -39,6 +40,7 @@ import me.criex.essentialschat.providers.PrefixSuffixProvider;
 import me.criex.essentialschat.providers.ProviderSelector;
 import me.criex.essentialschat.task.NameTagUpdateTask;
 import me.criex.essentialschat.utils.ConfigUtils;
+import me.criex.essentialschat.utils.Data;
 import me.criex.essentialschat.utils.Message;
 
 import java.util.*;
@@ -60,6 +62,7 @@ public class EssentialsChat extends PluginBase {
     private DisplayManager displayManager;
     private ChatManager chatManager;
     private Message message;
+    private Data data;
 
     // Config
     private ConfigUtils configUtils;
@@ -92,6 +95,7 @@ public class EssentialsChat extends PluginBase {
         // Initialize config
         configUtils = new ConfigUtils(this);
         message = new Message(this);
+        data = new Data(this, configUtils);
 
         // Check for prefix providers
         if (getServer().getPluginManager().getPlugin("LuckPerms") != null) {
@@ -123,7 +127,7 @@ public class EssentialsChat extends PluginBase {
             getLogger().warning("§eNo prefix provider found! Prefix support disabled.");
         }
 
-        nickManager = new NickManager(this, configUtils);
+        nickManager = new NickManager(this, configUtils, data);
         prefixManager = new PrefixManager(this, provider, configUtils);
         displayManager = new DisplayManager(this, provider, configUtils);
         chatManager = new ChatManager(provider, configUtils);

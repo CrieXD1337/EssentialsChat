@@ -13,6 +13,10 @@ language: default
 # Color for OP players. For example, b = §b
 op-nickname-color: "4"
 
+# Data storage provider (nicknames)
+# Available: json, yaml
+data-provider: "json"
+
 # Chat formatting settings
 chat-formatting:
 

@@ -22,6 +22,7 @@
  *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  *  SOFTWARE.
  */
+
 package me.criex.essentialschat.utils;
 
 import cn.nukkit.utils.Config;
@@ -44,6 +45,7 @@ public class ConfigUtils {
     public List<String> nicknameBlacklist;
     public List<String> prefixBlacklist;
     public boolean debug;
+    public String dataProvider;
     public int localChatRadius;
     public String globalChatSymbol;
     public String localChatFormat;
@@ -95,6 +97,12 @@ public class ConfigUtils {
         // General settings
         debug = config.getBoolean("debug", false);
         language = config.getString("language", "default");
+
+        dataProvider = config.getString("data-provider", "json").toLowerCase();
+        if (!List.of("json", "yaml").contains(dataProvider)) {
+            main.getLogger().warning("§eInvalid data-provider value: " + dataProvider + ". Defaulting to 'json'.");
+            dataProvider = "json";
+        }
 
         // Chat format settings
         formatMethod = config.getInt("chat-formatting.format-method", 1);

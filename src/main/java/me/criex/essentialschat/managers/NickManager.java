@@ -22,6 +22,7 @@
  *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  *  SOFTWARE.
  */
+
 package me.criex.essentialschat.managers;
 
 import cn.nukkit.Player;
@@ -29,8 +30,8 @@ import lombok.Getter;
 import lombok.Setter;
 import me.criex.essentialschat.EssentialsChat;
 import me.criex.essentialschat.utils.ConfigUtils;
+import me.criex.essentialschat.utils.Data;
 
-import java.util.HashMap;
 import java.util.Map;
 
 @Getter
@@ -38,20 +39,22 @@ import java.util.Map;
 public class NickManager {
     private final EssentialsChat plugin;
     private final ConfigUtils configUtils;
-    private final Map<String, String> playerNicks = new HashMap<>();
+    private final Data data;
 
-    public NickManager(EssentialsChat plugin, ConfigUtils configUtils) {
+    public NickManager(EssentialsChat plugin, ConfigUtils configUtils, Data data) {
         this.plugin = plugin;
         this.configUtils = configUtils;
+        this.data = data;
     }
 
     public void setPlayerNick(Player player, String nick) {
         if (configUtils.isDebug()) {
-            plugin.getLogger().info("§b[DEBUG] Setting nick for player: " + player.getName() + ", nick: " + nick);
+            plugin.getLogger().info("§b[DEBUG] Setting nick for player: " + player.getName() + ", nick: " + (nick != null ? nick : "null"));
         }
-        playerNicks.put(player.getName(), nick);
-        if (configUtils.isDebug()) {
-            plugin.getLogger().info("§b[DEBUG] Successfully set nick for player: " + player.getName() + ", nick: " + nick);
+        if (nick == null) {
+            data.removeNick(player.getName());
+        } else {
+            data.setNick(player.getName(), nick);
         }
     }
 
@@ -59,41 +62,46 @@ public class NickManager {
         if (configUtils.isDebug()) {
             plugin.getLogger().info("§b[DEBUG] Clearing nick for player: " + player.getName());
         }
-        playerNicks.remove(player.getName());
-        if (configUtils.isDebug()) {
-            plugin.getLogger().info("§b[DEBUG] Successfully cleared nick for player: " + player.getName());
-        }
+        data.removeNick(player.getName());
     }
 
     public String getRealName(String fakeNick) {
+        if (fakeNick == null) {
+            if (configUtils.isDebug()) {
+                plugin.getLogger().info("§b[DEBUG] Fake nick is null, returning null");
+            }
+            return null;
+        }
         if (configUtils.isDebug()) {
             plugin.getLogger().info("§b[DEBUG] Looking up real name for nick: " + fakeNick);
         }
-        for (Map.Entry<String, String> entry : playerNicks.entrySet()) {
-            if (entry.getValue().equalsIgnoreCase(fakeNick)) {
-                if (configUtils.isDebug()) {
-                    plugin.getLogger().info("§b[DEBUG] Found real name: " + entry.getKey() + " for nick: " + fakeNick);
-                }
-                return entry.getKey();
-            }
-        }
+        String realName = data.getRealName(fakeNick);
         if (configUtils.isDebug()) {
-            plugin.getLogger().info("§b[DEBUG] No real name found for nick: " + fakeNick);
+            plugin.getLogger().info("§b[DEBUG] Found real name: " + (realName != null ? realName : "none") + " for nick: " + fakeNick);
         }
-        return null;
+        return realName;
     }
 
     public String getPlayerNick(Player player) {
-        String nick = playerNicks.getOrDefault(player.getName(), null);
         // not need this debug now
         //if (plugin.isDebugEnabled()) {
         //    plugin.getLogger().info("§b[DEBUG] Retrieved nick for player: " + player.getName() + ", nick: " + (nick != null ? nick : "none"));
         //}
+        String nick = data.getNick(player.getName());
+        if (configUtils.isDebug()) {
+            plugin.getLogger().info("§b[DEBUG] Retrieved nick for player: " + player.getName() + ", nick: " + (nick != null ? nick : "none"));
+        }
         return nick;
     }
 
     public boolean isUsed(String nick) {
-        boolean used = playerNicks.containsValue(nick);
+        if (nick == null) {
+            if (configUtils.isDebug()) {
+                plugin.getLogger().info("§b[DEBUG] Nick to check is null, returning false");
+            }
+            return false;
+        }
+        boolean used = data.isNickUsed(nick);
         if (configUtils.isDebug()) {
             plugin.getLogger().info("§b[DEBUG] Checking if nick is used: " + nick + ", result: " + used);
         }
@@ -102,8 +110,8 @@ public class NickManager {
 
     public Map<String, String> getAllNicks() {
         if (configUtils.isDebug()) {
-            plugin.getLogger().info("§b[DEBUG] Retrieving all nicks: " + playerNicks);
+            plugin.getLogger().info("§b[DEBUG] Retrieving all nicks");
         }
-        return playerNicks;
+        return data.getAllNicks();
     }
 }
