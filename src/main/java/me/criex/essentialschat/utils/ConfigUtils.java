@@ -40,6 +40,7 @@ import java.util.stream.Collectors;
 public class ConfigUtils {
     private final EssentialsChat main;
     private final Config config;
+    private Config layout;
 
     // Settings
     public List<String> nicknameBlacklist;
@@ -75,12 +76,25 @@ public class ConfigUtils {
     public int chatMaxRepeat;
     public String language;
 
+    // Layout settings
+    public String welcomeMessageText;
+    public String welcomeMessageType;
+    public boolean welcomeMessageEnabled;
+    public String deathMessageText;
+    public String deathMessageType;
+    public boolean deathMessageEnabled;
+    public String defaultDeathMessageText;
+    public String defaultDeathMessageType;
+    public boolean defaultDeathMessageEnabled;
+
     public ConfigUtils(EssentialsChat main) {
         this.main = main;
         this.main.saveDefaultConfig();
         this.main.saveResource("lang/eng.lang");
         this.main.saveResource("lang/zho.lang");
         this.main.saveResource("lang/rus.lang");
+        this.main.saveResource("layout/layout.yml");
+        this.layout = new Config(new File(main.getDataFolder(), "layout/layout.yml"), Config.YAML);
         this.config = main.getConfig();
         loadConfig();
     }
@@ -159,10 +173,36 @@ public class ConfigUtils {
             main.getLogger().warning("§ePunishment command is empty for 'Command' repetition-punishment. Defaulting to 'Message'.");
             repetitionPunishment = "Message";
         }
+
+        // Layout settings from layout.yml
+        welcomeMessageText = TextFormat.colorize(layout.getString("welcome-message.text", "§aWelcome to the server, {player}!"));
+        welcomeMessageType = layout.getString("welcome-message.type", "message").toLowerCase();
+        welcomeMessageEnabled = layout.getBoolean("welcome-message.enabled", true);
+        if (!List.of("message", "title", "actionbar").contains(welcomeMessageType)) {
+            main.getLogger().warning("§eInvalid welcome-message type: " + welcomeMessageType + ". Defaulting to 'message'.");
+            welcomeMessageType = "message";
+        }
+
+        deathMessageText = TextFormat.colorize(layout.getString("death-message.text", "§c{player} was killed by {killer}!"));
+        deathMessageType = layout.getString("death-message.type", "actionbar").toLowerCase();
+        deathMessageEnabled = layout.getBoolean("death-message.enabled", true);
+        if (!List.of("message", "title", "actionbar").contains(deathMessageType)) {
+            main.getLogger().warning("§eInvalid death-message type: " + deathMessageType + ". Defaulting to 'actionbar'.");
+            deathMessageType = "actionbar";
+        }
+
+        defaultDeathMessageText = TextFormat.colorize(layout.getString("death-message.single-death.text", "§c{player} died!"));
+        defaultDeathMessageType = layout.getString("death-message.single-death.type", "actionbar").toLowerCase();
+        defaultDeathMessageEnabled = layout.getBoolean("death-message.single-death.enabled", false);
+        if (!List.of("message", "title", "actionbar").contains(defaultDeathMessageType)) {
+            main.getLogger().warning("§eInvalid default-death-message type: " + defaultDeathMessageType + ". Defaulting to 'actionbar'.");
+            defaultDeathMessageType = "actionbar";
+        }
     }
 
     public void reloadConfig() {
         main.reloadConfig();
+        layout = new Config(new File(main.getDataFolder(), "layout/layout.yml"), Config.YAML);
         loadConfig();
     }
 }

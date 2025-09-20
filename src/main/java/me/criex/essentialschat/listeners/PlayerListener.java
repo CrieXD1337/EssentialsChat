@@ -22,23 +22,31 @@
  *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  *  SOFTWARE.
  */
+
 package me.criex.essentialschat.listeners;
 
 import cn.nukkit.Player;
 import cn.nukkit.event.EventHandler;
 import cn.nukkit.event.Listener;
 import cn.nukkit.event.player.PlayerChatEvent;
+import cn.nukkit.event.player.PlayerDeathEvent;
 import cn.nukkit.event.player.PlayerJoinEvent;
 import me.criex.essentialschat.EssentialsChat;
+import me.criex.essentialschat.managers.DisplayManager;
+import me.criex.essentialschat.utils.ConfigUtils;
 import me.criex.essentialschat.utils.Message;
 
 public class PlayerListener implements EventListener, Listener {
     private final EssentialsChat plugin;
     private final Message message;
+    private final ConfigUtils configUtils;
+    private final DisplayManager displayManager;
 
     public PlayerListener(EssentialsChat plugin) {
         this.plugin = plugin;
         this.message = plugin.getMessage();
+        this.configUtils = plugin.getConfigUtils();
+        this.displayManager = plugin.getDisplayManager();
     }
 
     @EventHandler
@@ -126,5 +134,67 @@ public class PlayerListener implements EventListener, Listener {
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
         plugin.getDisplayManager().updateDisplay(event.getPlayer());
+        Player player = event.getPlayer();
+        displayManager.updateDisplay(player);
+
+        if (configUtils.isWelcomeMessageEnabled()) {
+            String message = configUtils.getWelcomeMessageText().replace("{player}", player.getName());
+            String type = configUtils.getWelcomeMessageType();
+
+            switch (type) {
+                case "message":
+                    player.sendMessage(message);
+                    break;
+                case "title":
+                    player.sendTitle(message, "", 20, 40, 20);
+                    break;
+                case "actionbar":
+                    player.sendActionBar(message);
+                    break;
+            }
+            if (configUtils.isDebug()) {
+                plugin.getLogger().info("§b[DEBUG] Sent welcome message to " + player.getName() + ": " + message + " (type: " + type + ")");
+            }
+        }
+    }
+
+    @EventHandler
+    public void onPlayerDeath(PlayerDeathEvent event) {
+        Player player = event.getEntity();
+        String message;
+        String type;
+        boolean enabled;
+
+        if (player.getKiller() instanceof Player && configUtils.isDeathMessageEnabled()) {
+            Player killer = (Player) player.getKiller();
+            message = configUtils.getDeathMessageText()
+                    .replace("{player}", player.getName())
+                    .replace("{killer}", killer.getName());
+            type = configUtils.getDeathMessageType();
+            enabled = true;
+        } else if (configUtils.isDefaultDeathMessageEnabled()) {
+            message = configUtils.getDefaultDeathMessageText().replace("{player}", player.getName());
+            type = configUtils.getDefaultDeathMessageType();
+            enabled = true;
+        } else {
+            return;
+        }
+
+        if (enabled) {
+            switch (type) {
+                case "message":
+                    plugin.getServer().getOnlinePlayers().values().forEach(p -> p.sendMessage(message));
+                    break;
+                case "title":
+                    plugin.getServer().getOnlinePlayers().values().forEach(p -> p.sendTitle(message, "", 20, 40, 20));
+                    break;
+                case "actionbar":
+                    plugin.getServer().getOnlinePlayers().values().forEach(p -> p.sendActionBar(message));
+                    break;
+            }
+            if (configUtils.isDebug()) {
+                plugin.getLogger().info("§b[DEBUG] Sent death message for " + player.getName() + ": " + message + " (type: " + type + ")");
+            }
+        }
     }
 }

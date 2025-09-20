@@ -1,0 +1,13 @@
+welcome-message:
+  text: "§aWelcome to the EssentialsChat, {player}!"
+  type: "message"
+  enabled: true
+
+death-message:
+  text: "§c{player} was killed by {killer}!"
+  type: "actionbar"
+  enabled: true
+  single-death:
+    text: "§c{player} died!"
+    type: "actionbar"
+    enabled: false
