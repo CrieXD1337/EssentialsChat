@@ -154,11 +154,6 @@ public class EssentialsChat extends PluginBase {
         }
     }
 
-    @Override
-    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        return false;
-    }
-
     public String formatNick(String nick) {
         if (configUtils.isAllowColoredNick()) {
             return configUtils.getFakeNicknameCharacter() + nick.replace('&', '§');
